@@ -7,3 +7,5 @@ Necessary packages to be installed:
 * sqlalchemy (version 1.4.51)
 * geoalchemy2
 * psycopg2
+* pytorch (conda install pytorch torchvision -c pytorch)
+* pytorch_geometric (pip install torch_geometric)
