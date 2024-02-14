@@ -9,3 +9,4 @@ Necessary packages to be installed:
 * psycopg2
 * pytorch (conda install pytorch torchvision -c pytorch)
 * pytorch_geometric (pip install torch_geometric)
+* rasterio (pip install rasterio)
