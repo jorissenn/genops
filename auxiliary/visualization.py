@@ -1,11 +1,13 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-def plot_raster(raster):
+def plot_raster(raster, axis=False):
     '''Visualizes a given raster'''
     # prepare figure and axis
     fig, ax = plt.subplots(1, figsize = (5,5))
-    ax.axis("off")
+
+    if not axis:
+        ax.axis("off")
 
     # define the colormap
     cmap = plt.cm.gray_r
