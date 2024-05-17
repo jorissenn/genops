@@ -3,24 +3,6 @@ import pandas as pd
 import geopandas as gpd
 import shapely
 
-def get_roads_from_street_block(roads, street_blocks, block_id):
-    '''Returns the roads of a given street block.'''
-    # extracting the street block and its geometry with the corresponding block_id
-    street_block = street_blocks.copy()[street_blocks["block_id"] == block_id]
-    street_block_geom = street_block.geometry.iloc[0]
-
-    # extracting the street block boundary and transforming back to GeoDataFrame
-    street_block_boundary = gpd.GeoDataFrame(geometry=street_block.boundary)
-
-    # there might also be roads within the street block that are not part of the boundary
-    roads_within_block = roads[roads.geometry.within(street_block_geom)]
-    roads_within_block = roads_within_block.rename(columns={"geom": "geometry"})
-
-    # concatenating the boundary and the interior roads of the street block
-    roads_street_block = pd.concat([street_block_boundary, roads_within_block], ignore_index=True).reset_index(drop=True)
-    
-    return roads_street_block
-
 def get_sample_points(linestrings, dist):
     '''Given a set of linestrings, unions their geometry and samples a point every dist meters'''
     # union the roads of a street block to a single MultiLineString
@@ -68,7 +50,7 @@ def construct_voronoi_polygons(buildings, street_blocks, block_id):
     # extract centroids within street block block_id
     buildings_block = buildings.copy()[buildings["block_id"] == block_id]
 
-    # dump all convex hull vertices to a new DataFrame
+    # dump all convex hull vertices to a new DataFrame
     building_points_gdf = dump_polygon_gdf_to_points(buildings_block)
     building_points = building_points_gdf.geometry
     
@@ -84,7 +66,7 @@ def construct_voronoi_polygons(buildings, street_blocks, block_id):
     voronoi_polygons_gdf = gpd.GeoDataFrame(geometry=list(voronoi_polygons.geoms))
     voronoi_polygons_gdf = voronoi_polygons_gdf.set_crs("epsg:2056")
 
-    # assign uuid of original buildings to Voronoi polygons
+    # assign uuid of original buildings to Voronoi polygons
     voronoi_polygons_gdf = gpd.sjoin(voronoi_polygons_gdf, building_points_gdf, how="inner", predicate="intersects")
     voronoi_polygons_gdf = voronoi_polygons_gdf.drop(labels="index_right", axis=1)
 
