@@ -10,3 +10,4 @@ Necessary packages to be installed:
 * pytorch (conda install pytorch torchvision -c pytorch)
 * pytorch_geometric (pip install torch_geometric)
 * rasterio (pip install rasterio)
+* multiprocess (pip install multiprocess)
