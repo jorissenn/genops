@@ -2,13 +2,13 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-def send_notification(model, email_address, n_samples, n_epochs, batch_size):
+def send_notification(model, email_address, n_samples, n_epochs, batch_size, time):
     '''Sends an email from the cluster to inform once the training process of a given model has finished.'''
     
     FROM = "noreply-s3it@zi.uzh.ch"
     TO = email_address
     SUBJECT = "Training finished!"
-    TEXT = f"The training process of {model} has finished ({n_samples:,} samples over {n_epochs:,} epochs with batch size {batch_size:,})."
+    TEXT = f"The training process of {model} has finished in {time:,.3f} s ({n_samples:,} samples over {n_epochs:,} epochs with batch size {batch_size:,})."
     
     # Create a multipart message and set headers
     message = MIMEMultipart()
