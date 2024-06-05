@@ -11,3 +11,4 @@ Necessary packages to be installed:
 * pytorch_geometric (pip install torch_geometric)
 * rasterio (pip install rasterio)
 * multiprocess (pip install multiprocess)
+* einops (pip install einops)
