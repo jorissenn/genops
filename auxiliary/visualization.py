@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
@@ -93,9 +94,7 @@ def visualize_operator_distribution(buildings, operators, save=False, path=None)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.legend([handles[idx] for idx in order],
               [labels[idx] for idx in order],
-              loc='center left', bbox_to_anchor=(1, 0.5), 
-              frameon=False, 
-              prop={'size': 14, 'weight': 'bold'})
+              loc='center left', bbox_to_anchor=(1, 0.5), frameon=False, prop={'size': 14, 'weight': 'bold'})
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
@@ -124,3 +123,35 @@ def visualize_labelset_distribution(buildings, save=False, path=None):
 
     if save:
         fig.savefig(path, bbox_inches="tight")
+
+def visualize_losses(loss_files, path_to_loss_files, save=False, output_path=None):
+    '''Given a list of files containing CSV files with training and validation loss, creates a graph that visualizes the loss curves.'''
+    plt.figure(figsize=figsize)
+    plt.xlabel("Epoch", fontsize=15)
+    plt.ylabel("Loss", fontsize=15)
+
+    for loss_file in loss_files:
+        loss_file_path = os.path.join(path_to_loss_files, loss_file)
+        cur_loss = pd.read_csv(loss_file_path)
+
+        epochs = list(range(1, cur_loss.shape[0] + 1))
+        
+        cur_training_loss = cur_loss["training_loss"]
+        cur_validation_loss = cur_loss["validation_loss"]
+        
+        plt.plot(epochs, cur_training_loss, color="orange", label="training loss")
+        plt.plot(epochs, cur_validation_loss, color="red", label="validation loss")
+
+    # Set the x-axis to use integer locator
+    ax = plt.gca()  # Get the current axis
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))  # Only integer labels
+
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    plt.legend(loc="center left", bbox_to_anchor=(1, 0.5), frameon=False, prop={'size': 14, 'weight': 'bold'})
+    plt.show()
+
+    if save:
+        fig.savefig(output_path, bbox_inches="tight")

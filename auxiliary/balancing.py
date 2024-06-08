@@ -23,7 +23,7 @@ def calculate_imbalance_measures(buildings, operators):
 
     return mean_ir, cvir
 
-def lp_resampling(buildings, target_size):
+def lp_resample(buildings, target_size):
     '''Under- and oversamples a given building DataFrame with respect to their labelsets until the DataFrame reaches target size.'''
     # group all buildings by their labelsets and create a dictionary with indices
     labelset_bags = buildings.groupby("labelset").groups
@@ -32,16 +32,31 @@ def lp_resampling(buildings, target_size):
     # calculate target labelset bag size such that all labelsets are represented equally
     target_labelset_bagsize = math.ceil(target_size / len(labelset_bags))
 
-    # oversample or undersample all the labelsets until they reach the target labelset bagsize
-    for labelset in labelset_bags:
+    # partition the labelset bags into majority and minority labelset bags based on whether they are smaller or larger than the target size
+    labelset_bags_minority = [labelset for labelset, bag in labelset_bags.items() if len(bag) < target_labelset_bagsize]
+    labelset_bags_majority = [labelset for labelset, bag in labelset_bags.items() if len(bag) >= target_labelset_bagsize]
+
+    # oversample all the minority labelsets until they reach the target labelset bagsize
+    for labelset in labelset_bags_minority:
         # get the bag of the current labelset
         cur_bag = labelset_bags[labelset]
 
-        # resample the bag until it reaches the target labelset bagsize
-        cur_bag_resampled = random.choices(cur_bag, k=target_labelset_bagsize)
+        # oversample the bag until it reaches the target labelset bagsize by duplicating elements
+        cur_bag_oversampled = (cur_bag * ((target_labelset_bagsize // len(cur_bag)) + 1))[:target_labelset_bagsize]
 
-        # reassign the resampled bag back to the corresponding labelset
-        labelset_bags[labelset] = cur_bag_resampled
+        # reassign the oversampled bag back to the corresponding labelset
+        labelset_bags[labelset] = cur_bag_oversampled
+
+    # undersample all the majority labelsets until they reach the target labelset bagsize
+    for labelset in labelset_bags_majority:
+        # get the bag of the current labelset
+        cur_bag = labelset_bags[labelset]
+        
+        # undersample the bag until it reaches the target labelset bagsize by randomly choosing elements without replacement
+        cur_bag_undersampled = random.sample(cur_bag, k=target_labelset_bagsize)
+
+        # reassign the undersampled bag back to the corresponding labelset
+        labelset_bags[labelset] = cur_bag_undersampled
 
     # extract all indices from the resampled labelset bags dictionary
     resampled_indices = [index for indices in labelset_bags.values() for index in indices]
