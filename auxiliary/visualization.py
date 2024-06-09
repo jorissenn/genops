@@ -4,6 +4,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
 import networkx as nx
+from sklearn.metrics import ConfusionMatrixDisplay
 
 # define DIN font
 plt.rcParams["font.family"] = "DIN Alternate"
@@ -155,3 +156,14 @@ def visualize_losses(loss_files, path_to_loss_files, save=False, output_path=Non
 
     if save:
         fig.savefig(output_path, bbox_inches="tight")
+
+def visualize_confusion_matrix(conf_matrix, operator):
+    '''Visualizes a given confusion matrix.'''
+    plt.rcParams.update({"font.size": 14})
+
+    # display the confusion matrix
+    disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=["Not Present", "Present"])
+    disp.plot(cmap=plt.cm.Greys, colorbar=False)
+    plt.xlabel(f"Predicted {operator}", fontsize=15)
+    plt.ylabel(f"True {operator}", fontsize=15)
+    plt.show()
