@@ -4,10 +4,12 @@ import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
 import networkx as nx
+import torch
 from sklearn.metrics import ConfusionMatrixDisplay
 
-# define DIN font
-plt.rcParams["font.family"] = "DIN Alternate"
+# Define DIN font for plots if working locally
+if not torch.cuda.is_available():
+    plt.rcParams["font.family"] = "DIN Alternate"
 
 # define standard figure size for plots
 figsize = (10, 6)
