@@ -28,7 +28,7 @@ def plot_raster(raster, axis=False):
     # plot the raster with specified colormap
     plt.imshow(raster, cmap=cmap, vmin=0, vmax=1)
 
-def plot_graph(graph, ax, labels=False, node_color=None):
+def plot_graph(graph, ax, labels=False, node_color=None, edge_color=None):
     '''Visualizes a given graph on a given axis using the centroid coordinates associated with the nodes'''
     # extract the centroid coordinates for the nodes
     x_coords = nx.get_node_attributes(graph, "coord_x")
@@ -38,16 +38,23 @@ def plot_graph(graph, ax, labels=False, node_color=None):
     pos = {i: (x_coords[i], y_coords[i]) for i in range(graph.number_of_nodes())}
 
     if node_color:
-        # get node types and create a color map
-        types = nx.get_node_attributes(graph, node_color)
-        unique_types = set(types.values())
-        color_map = {t: i for i, t in enumerate(unique_types)}
-        node_colors = [color_map[types[node]] for node in graph.nodes()]
+        node_color_map = {"building": "orange", "road": "red"}
+        node_colors = [node_color_map[graph.nodes[n][node_color]] for n in graph.nodes()]
     else:
         node_colors = "k"
 
+    if edge_color:
+        edge_color_map = {"building to building": "orange", "building to road": "red"}
+        edge_colors = [edge_color_map[graph.edges[e][edge_color]] for e in graph.edges()]
+    else:
+        edge_colors = "r"
+
     # draw the graph
-    nx.draw(G=graph, pos=pos, ax=ax, with_labels=labels, node_size=20, width=2, edge_color="r", node_color=node_colors, arrows=False)
+    nx.draw(G=graph, pos=pos, ax=ax, node_size=30, width=2, edge_color=edge_colors, node_color=node_colors, arrows=False)
+
+    # add labels if specified
+    if labels:
+        nx.draw_networkx_labels(G=graph, pos=pos, font_size=12, font_color="white")
 
 def visualize_operator_distribution(buildings, operators, save=False, path=None):
     '''Plots the distribution of the given generalization operators within a buildings DataFrame individually in a barplot.'''
