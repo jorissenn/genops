@@ -8,7 +8,7 @@ Necessary packages to be installed:
 * geoalchemy2
 * psycopg2
 * pytorch (conda install pytorch torchvision -c pytorch)
-* pytorch_geometric (pip install torch_geometric)
+* pyg (pip install torch_geometric)
 * rasterio (pip install rasterio)
 * multiprocess (pip install multiprocess)
 * einops (pip install einops)
