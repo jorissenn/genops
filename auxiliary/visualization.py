@@ -14,6 +14,19 @@ if not torch.cuda.is_available():
 # define standard figure size for plots
 figsize = (10, 6)
 
+def plot_geometry(geom, ax, **kwargs):
+    '''Visualizes a given shapely geometry on a given axis.'''
+    if geom.geom_type == 'Point':
+        ax.plot(geom.x, geom.y, 'o', **kwargs)
+    elif geom.geom_type == 'LineString':
+        x, y = geom.xy
+        ax.plot(x, y, **kwargs)
+    elif geom.geom_type == 'Polygon':
+        x, y = geom.exterior.xy
+        ax.plot(x, y, **kwargs)
+    else:
+        raise ValueError(f"Unsupported geometry type: {geom.geom_type}")
+
 def plot_raster(raster, axis=False):
     '''Visualizes a given raster'''
     # prepare figure and axis
@@ -28,14 +41,17 @@ def plot_raster(raster, axis=False):
     # plot the raster with specified colormap
     plt.imshow(raster, cmap=cmap, vmin=0, vmax=1)
 
-def plot_graph(graph, ax, labels=False, node_color=None, edge_color=None):
+def plot_graph(graph, ax, position=True, labels=False, node_color=None, edge_color=None):
     '''Visualizes a given graph on a given axis using the centroid coordinates associated with the nodes'''
     # extract the centroid coordinates for the nodes
-    x_coords = nx.get_node_attributes(graph, "coord_x")
-    y_coords = nx.get_node_attributes(graph, "coord_y")
+    if position:
+        x_coords = nx.get_node_attributes(graph, "coord_x")
+        y_coords = nx.get_node_attributes(graph, "coord_y")
 
-    # determine node positions according to centroid coordinates
-    pos = {i: (x_coords[i], y_coords[i]) for i in range(graph.number_of_nodes())}
+        # determine node positions according to centroid coordinates
+        pos = {i: (x_coords[i], y_coords[i]) for i in range(graph.number_of_nodes())}
+    else:
+        pos = None
 
     if node_color:
         node_color_map = {"building": "orange", "road": "red"}
