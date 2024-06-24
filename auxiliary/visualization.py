@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.colors import ListedColormap
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -27,7 +28,7 @@ def plot_geometry(geom, ax, **kwargs):
     else:
         raise ValueError(f"Unsupported geometry type: {geom.geom_type}")
 
-def plot_raster(raster, axis=False):
+def plot_raster(raster, axis=False, color=None):
     '''Visualizes a given raster'''
     # prepare figure and axis
     fig, ax = plt.subplots(1, figsize = (5,5))
@@ -35,8 +36,17 @@ def plot_raster(raster, axis=False):
     if not axis:
         ax.axis("off")
 
+    # remove axis ticks and labels
+    ax.set_xticks([])
+    ax.set_xticklabels([])
+    ax.set_yticks([])
+    ax.set_yticklabels([])
+
     # define the colormap
-    cmap = plt.cm.gray_r
+    if color:
+        cmap = ListedColormap(['white', color])
+    else:
+        cmap = plt.cm.gray_r
 
     # plot the raster with specified colormap
     plt.imshow(raster, cmap=cmap, vmin=0, vmax=1)
