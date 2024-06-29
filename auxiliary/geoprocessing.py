@@ -18,12 +18,19 @@ def dump_polygon_gdf_to_points(polygon_gdf):
     # iterate over each row in the GeoDataFrame
     for index, row in polygon_gdf.iterrows():
         geom = row[active_geom_column]
-        # first and last vertex coordinates are contained twice and have to be removed
-        geom_coords = list(dict.fromkeys(list(geom.exterior.coords)))
 
-        # extract vertices from the geometry
-        for x, y in geom_coords:
-            data.append({"geometry": shapely.geometry.Point(x, y), **row.drop(geometry_columns)})
+        if geom.geom_type == "Polygon":
+            geom_list = [geom]
+        elif geom.geom_type == "MultiPolygon":
+            geom_list = list(geom.geoms)
+
+        for poly in geom_list:
+            # first and last vertex coordinates are contained twice and have to be removed
+            geom_coords = list(dict.fromkeys(list(poly.exterior.coords)))
+
+            # extract vertices from the geometry
+            for x, y in geom_coords:
+                data.append({"geometry": shapely.geometry.Point(x, y), **row.drop(geometry_columns)})
 
     points_gdf = gpd.GeoDataFrame(data, geometry="geometry")
 
