@@ -7,6 +7,7 @@ import pandas as pd
 import networkx as nx
 import torch
 from sklearn.metrics import ConfusionMatrixDisplay
+from auxiliary.balancing import assign_labelset
 
 # Define DIN font for plots if working locally
 if not torch.cuda.is_available():
@@ -137,8 +138,12 @@ def visualize_operator_distribution(buildings, operators, save=False, path=None)
     if save:
         fig.savefig(path, bbox_inches="tight")
 
-def visualize_labelset_distribution(buildings, save=False, path=None):
+def visualize_labelset_distribution(buildings, labels, save=False, path=None):
     '''Plots the distribution of the labelsets in a given buildings DataFrame in a barplot.'''
+    # assign labelsets
+    buildings = buildings.copy()
+    buildings["labelset"] = buildings.apply(lambda row: assign_labelset(row, labels), axis=1)
+
     labelset_counts = buildings["labelset"].value_counts()
     labelset_counts_df = labelset_counts.reset_index()
     

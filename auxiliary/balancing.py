@@ -3,6 +3,19 @@ import pandas as pd
 import random
 import math
 
+def assign_labelset(row, labels):
+    '''Given a DataFrame row, returns a concatenated string of the specified column names, where the columns = 1.'''
+    labelset = []
+
+    for label in labels:
+        if label in row and row[label] == 1:
+            labelset.append(label.capitalize())
+
+    if labelset:
+        return ', '.join(labelset)
+
+    return "None"
+
 def calculate_imbalance_measures(buildings, operators):
     '''Given a DataFrame with buildings and a list of generalization operators, calculates the mean imbalance ratio and the coefficient of variation.'''
     # extraction of all labels as numpy array
@@ -23,8 +36,12 @@ def calculate_imbalance_measures(buildings, operators):
 
     return mean_ir, cvir
 
-def lp_resample(buildings, target_size):
+def lp_resample(buildings, labels, target_size):
     '''Under- and oversamples a given building DataFrame with respect to their labelsets until the DataFrame reaches target size.'''
+    # assign labelsets
+    buildings = buildings.copy()
+    buildings["labelset"] = buildings.apply(lambda row: assign_labelset(row, labels), axis=1)
+
     # group all buildings by their labelsets and create a dictionary with indices
     labelset_bags = buildings.groupby("labelset").groups
     labelset_bags = {labelset: list(bag) for labelset, bag in labelset_bags.items()}
