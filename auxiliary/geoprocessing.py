@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -67,3 +68,44 @@ def compute_intersections(gdf1, gdf2, exclude_self_intersections=False):
     # convert list to numpy array
     intersection_array = np.array(intersections)
     return intersection_array
+
+def angle_between_vectors(v1, v2):
+    '''Calculates the angle enclosed by two vectors.'''
+    def dot_product(v1, v2):
+        return sum(x*y for x, y in zip(v1, v2))
+    
+    def magnitude(v):
+        return math.sqrt(sum(x*x for x in v))
+        
+    dot_prod = dot_product(v1, v2)
+    mag_v1 = magnitude(v1)
+    mag_v2 = magnitude(v2)
+    cos_theta = dot_prod / (mag_v1 * mag_v2)
+    theta = math.acos(cos_theta)  # angle in radians
+    return math.degrees(theta)  # convert to degrees
+
+def find_midpoints_of_shorter_sides(rectangle):
+    '''Given a rectangular shapely geometry, returns the coordinates of the midpoints of the two shorter sides.'''
+    # extract coordinates from the rectangle
+    coords = list(rectangle.exterior.coords)
+    
+    # list to hold sides and their lengths
+    sides = []
+    
+    # calculate the length of each side and store with the starting and ending points
+    for i in range(len(coords) - 1):
+        start = coords[i]
+        end = coords[i + 1]
+        length = ((end[0] - start[0])**2 + (end[1] - start[1])**2)**0.5
+        sides.append((length, start, end))
+    
+    # sort sides by length
+    sides.sort()
+    
+    # get the midpoints of the two shortest sides
+    midpoints = []
+    for length, start, end in sides[:2]:  # Only take the two shortest
+        midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
+        midpoints.append(midpoint)
+
+    return midpoints
