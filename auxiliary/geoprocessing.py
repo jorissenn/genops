@@ -69,20 +69,11 @@ def compute_intersections(gdf1, gdf2, exclude_self_intersections=False):
     intersection_array = np.array(intersections)
     return intersection_array
 
-def angle_between_vectors(v1, v2):
-    '''Calculates the angle enclosed by two vectors.'''
-    def dot_product(v1, v2):
-        return sum(x*y for x, y in zip(v1, v2))
+def angle_relative_to_horizontal(orientation_vector):
+    '''Calculates the angle of a vector relative to the horizontal axis.'''
+    angle = math.atan2(orientation_vector[1], orientation_vector[0])
     
-    def magnitude(v):
-        return math.sqrt(sum(x*x for x in v))
-        
-    dot_prod = dot_product(v1, v2)
-    mag_v1 = magnitude(v1)
-    mag_v2 = magnitude(v2)
-    cos_theta = dot_prod / (mag_v1 * mag_v2)
-    theta = math.acos(cos_theta)  # angle in radians
-    return math.degrees(theta)  # convert to degrees
+    return angle
 
 def find_midpoints_of_shorter_sides(rectangle):
     '''Given a rectangular shapely geometry, returns the coordinates of the midpoints of the two shorter sides.'''
