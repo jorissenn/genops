@@ -52,7 +52,7 @@ def plot_raster(raster, axis=False, color=None):
     # plot the raster with specified colormap
     plt.imshow(raster, cmap=cmap, vmin=0, vmax=1)
 
-def plot_graph(graph, ax, position=True, labels=False, node_color=None, node_color_map=None, edge_color=None, edge_color_map=None):
+def plot_graph(graph, ax, position=True, labels=False, node_color=None, node_color_map=None, edge_color=None, edge_color_map=None, axis=True):
     '''Visualizes a given graph on a given axis using the centroid coordinates associated with the nodes'''
     # extract the centroid coordinates for the nodes
     if position:
@@ -75,7 +75,11 @@ def plot_graph(graph, ax, position=True, labels=False, node_color=None, node_col
         edge_colors = "r"
 
     # draw the graph
-    nx.draw(G=graph, pos=pos, ax=ax, node_size=30, width=2, edge_color=edge_colors, node_color=node_colors, arrows=False)
+    nx.draw(G=graph, pos=pos, ax=ax, node_size=100, width=4, edge_color=edge_colors, node_color=node_colors, arrows=False)
+
+    # ensure the axes are visible
+    if axis:
+        ax.set_axis_on()
 
     # add labels if specified
     if labels:
