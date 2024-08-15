@@ -159,6 +159,7 @@ def visualize_labelset_distribution(buildings, labels, save=False, path=None):
     # set the formatter for the y-axis to use non-scientific notation
     ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{int(x):,}'))
     ax.tick_params(axis='x', which='major', labelsize=14)
+    ax.tick_params(axis='y', which='major', labelsize=14)
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
