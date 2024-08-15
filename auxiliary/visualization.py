@@ -7,7 +7,6 @@ import pandas as pd
 import networkx as nx
 import torch
 from sklearn.metrics import ConfusionMatrixDisplay
-from auxiliary.balancing import assign_labelset
 
 # Define DIN font for plots if working locally
 if not torch.cuda.is_available():
@@ -15,6 +14,19 @@ if not torch.cuda.is_available():
 
 # define standard figure size for plots
 figsize = (10, 6)
+
+def assign_labelset(row, labels):
+    '''Given a DataFrame row, returns a concatenated string of the specified column names, where the columns = 1.'''
+    labelset = []
+
+    for label in labels:
+        if label in row and row[label] == 1:
+            labelset.append(label.capitalize())
+
+    if labelset:
+        return ', '.join(labelset)
+
+    return "None"
 
 def plot_geometry(geom, ax, **kwargs):
     '''Visualizes a given shapely geometry on a given axis.'''
