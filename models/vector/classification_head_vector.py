@@ -6,9 +6,10 @@ class ClassificationHeadVector(nn.Module):
         super().__init__()
 
         self.fc = nn.Sequential(
-            pyg_nn.Linear(n_input_features, n_input_features//2),
-            nn.ReLU(inplace=True),
-            pyg_nn.Linear(n_input_features//2, n_classes)
+            pyg_nn.Linear(in_channels=n_input_features, out_channels=128),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            pyg_nn.Linear(in_channels=128, out_channels=n_classes),
         )
 
     def forward(self, x):
