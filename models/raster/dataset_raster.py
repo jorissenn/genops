@@ -3,6 +3,27 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+def npz_to_tensor(sample, attach_roads=True):
+    '''Converts a raster object as loaded from a .npz file to a tensor by extracting the necessary components
+    and stacking them accordingly.'''
+    # extract the rasters
+    focal_building = sample["focal_building"]
+    context_buildings = sample["context_buildings"]
+    roads = sample["roads"]
+
+    # stack the rasters according to attach_roads
+    if attach_roads:
+        # stack the rasters to shape (3, n_pixels, n_pixels)
+        block = np.stack([focal_building, context_buildings, roads], axis=0)
+    else:
+        # leave out the roads, stack the rasters to shape (2, n_pixels, n_pixels)
+        block = np.stack([focal_building, context_buildings], axis=0)
+
+    # convert rasters to tensor
+    block = torch.from_numpy(block).float()
+
+    return block
+
 class BuildingRasterDataset(Dataset):
     def __init__(self, path, operators, attach_roads=True, transform=None, subset=None):
         '''Stores the directory and filenames of the individual .npz files.'''
@@ -35,21 +56,8 @@ class BuildingRasterDataset(Dataset):
         # load the file with the filename
         sample = np.load(os.path.join(self.path, filename))
 
-        # extract the rasters
-        focal_building = sample["focal_building"]
-        context_buildings = sample["context_buildings"]
-        roads = sample["roads"]
-
-        # stack the rasters according to attach_roads
-        if self.attach_roads:
-            # stack the rasters to shape (3, n_pixels, n_pixels)
-            block = np.stack([focal_building, context_buildings, roads], axis=0)
-        else:
-            # leave out the roads, stack the rasters to shape (2, n_pixels, n_pixels)
-            block = np.stack([focal_building, context_buildings], axis=0)
-
-        # convert rasters to tensor
-        block = torch.from_numpy(block).float()
+        # convert loaded file to tensor
+        block = npz_to_tensor(sample, attach_roads=self.attach_roads)
 
         if self.transform:
             block = self.transform(block)
