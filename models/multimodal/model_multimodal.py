@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
+import copy
 
 from classification_head_multimodal import ClassificationHeadMultimodal
 
 class MultimodalModel(nn.Module):
     def __init__(self, raster_model, vector_model, dummy_raster_sample, dummy_vector_sample, n_classes):
         super(MultimodalModel, self).__init__()
-        self.raster_model = raster_model
-        self.vector_model = vector_model
+        self.raster_model = copy.deepcopy(raster_model)
+        self.vector_model = copy.deepcopy(vector_model)
         
         # both models are already trained and only require gradient for multimodal classification head
         for param in self.raster_model.parameters():
