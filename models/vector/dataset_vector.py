@@ -2,6 +2,24 @@ import os
 import torch
 from torch_geometric.data import Dataset
 
+def process_HeteroData(sample, operators, features, attach_roads=True):
+    '''Processes a raw HeteroData object as loaded from a .pt file by removing road nodes and edges if specified and returning only the specified features and operators.'''
+    # remove road nodes and edges connecting road nodes to building nodes
+    if not attach_roads:
+        edge_types_to_remove = [edge_type for edge_type in sample.edge_types if "road" in edge_type]
+        for edge_type in edge_types_to_remove:
+            del sample[edge_type]
+        del sample["road"]
+
+    # only return the operators specified by slicing sample.y and reshaping accordingly
+    sample.y = sample.y[operators].reshape(1, -1)
+
+    # only return the features specified by slicing focal and context buildings accordingly
+    sample["focal_building"].x = sample["focal_building"].x[:,features]
+    sample["context_building"].x = sample["context_building"].x[:,features]
+
+    return sample
+
 class BuildingVectorDataset(Dataset):
     def __init__(self, path, operators, operator_order, features, feature_order, attach_roads=True, transform=None, subset=None):
         '''Stores the directory and filenames of the individual .pt files.'''
@@ -35,21 +53,10 @@ class BuildingVectorDataset(Dataset):
         filename = self.filenames[index]
 
         # load the file with the filename
-        sample = torch.load(os.path.join(self.path, filename))
+        sample_raw = torch.load(os.path.join(self.path, filename))
 
-        # remove road nodes and edges connecting road nodes to building nodes
-        if not self.attach_roads:
-            edge_types_to_remove = [edge_type for edge_type in sample.edge_types if "road" in edge_type]
-            for edge_type in edge_types_to_remove:
-                del sample[edge_type]
-            del sample["road"]
-
-        # only return the operators specified in the init method by slicing sample.y and reshaping accordingly
-        sample.y = sample.y[self.operators].reshape(1, -1)
-
-        # only return the features specified in the init method by slicing focal and context buildings accordingly
-        sample["focal_building"].x = sample["focal_building"].x[:,self.features]
-        sample["context_building"].x = sample["context_building"].x[:,self.features]
+        # process the raw HeteroData object according to the information specified in the init method
+        sample = process_HeteroData(sample_raw, operators=self.operators, features=self.features, attach_roads=self.attach_roads)
 
         # apply given transformation if specified
         if self.transform:
