@@ -88,7 +88,7 @@ class BuildingMultimodalDataset(Dataset):
                                            attach_roads=self.attach_roads)
 
         # extract the operators from the graph object
-        operators = vector_sample.y[self.operators]
+        operators = vector_sample.y
 
         if self.vector_transform:
             vector_sample = self.vector_transform(vector_sample)
