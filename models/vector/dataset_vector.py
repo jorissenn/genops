@@ -20,6 +20,21 @@ def process_HeteroData(sample, operators, features, attach_roads=True):
 
     return sample
 
+def get_dummy_sample(path, operators, operator_order, features, feature_order, attach_roads=True):
+    '''Given a path, reads and processes a dummy sample that can be used to initialize the GNNs.'''
+    # store indices of the operators within operator_order
+    operators = sorted([operator_order.index(operator) for operator in operators if operator in operator_order])
+    # store indices of the features within feature_order
+    features = sorted([feature_order.index(feature) for feature in features if feature in feature_order])
+
+    # read the dummy sample
+    dummy_sample_raw = torch.load(path)
+
+    # process the dummy sample according to the input parameters
+    dummy_sample = process_HeteroData(dummy_sample_raw, operators, features, attach_roads)
+
+    return dummy_sample
+
 class BuildingVectorDataset(Dataset):
     def __init__(self, path, operators, operator_order, features, feature_order, attach_roads=True, transform=None, subset=None):
         '''Stores the directory and filenames of the individual .pt files.'''
