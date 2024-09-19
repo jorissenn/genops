@@ -24,11 +24,13 @@ def send_notification(model, email_address, n_samples, n_epochs, batch_size, tim
     server.sendmail(FROM, TO, message.as_string())
     server.quit()
 
-def get_model_name(model, ops, attach_roads, n_samples, n_epochs, batch_size):
-    '''Given a Pytorch model and its associated metadata, outputs a unique name that identifes the model which is used for saving logs.'''
+def get_model_name(model, ops, attach_roads, n_samples, n_epochs, batch_size, device):
+    '''Given a Pytorch model and its associated metadata, outputs a unique name that identifies the model which is used for saving logs.'''
+    if device == "cuda":
+        device = "gpu"
     type = model.__class__.__name__
     if type == "MultimodalModel":
         type = "Multimodal" + (model.raster_model.__class__.__name__ + model.vector_model.__class__.__name__)
     n_params = model.get_n_parameters()
-    return f"{type}_{ops}_attachRoads{attach_roads}_{n_params}p_{n_samples}s_{n_epochs}ep_bs{batch_size}"
+    return f"{type}_{ops}_attachRoads{attach_roads}_{n_params}p_{n_samples}s_{n_epochs}ep_bs{batch_size}_{device}"
     
