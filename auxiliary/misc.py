@@ -26,8 +26,6 @@ def send_notification(model, email_address, n_samples, n_epochs, batch_size, tim
 
 def get_model_name(model, ops, attach_roads, n_samples, n_epochs, batch_size, device):
     '''Given a Pytorch model and its associated metadata, outputs a unique name that identifies the model which is used for saving logs.'''
-    if device == "cuda":
-        device = "gpu"
     type = model.__class__.__name__
     if type == "MultimodalModel":
         type = "Multimodal" + (model.raster_model.__class__.__name__ + model.vector_model.__class__.__name__)
