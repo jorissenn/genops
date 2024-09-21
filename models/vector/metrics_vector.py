@@ -1,9 +1,16 @@
 import torch
+from torch_geometric.loader import DataLoader
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
-def get_metrics_vector(model, dataloader, operators_to_pred, threshold, device):
-    '''Given a trained vector model, a dataloader, some operators to predict and a threshold, 
+def get_metrics_vector(model, dataset, batch_size, operators_to_pred, threshold, device):
+    '''Given a trained vector model, a dataset, a batch size, some operators to predict and a threshold, 
     calculates and returns accuracy metrics and confusion matrix.'''
+    # creating DataLoader
+    dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False)
+
+    # switch model to evaluation mode
+    model.eval()
+
     # storing the predictions and true labels from every batch for every operator
     true_operators_all = {}
     pred_operators_all = {}

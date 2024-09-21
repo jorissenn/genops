@@ -1,9 +1,18 @@
 import torch
+from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
-def get_metrics_multimodal(model, dataloader, operators_to_pred, threshold, device):
-    '''Given a trained multimodal model, a dataloader, some operators to predict and a threshold, 
+from dataset_multimodal import collate_raster_vector
+
+def get_metrics_multimodal(model, dataset, batch_size, operators_to_pred, threshold, device):
+    '''Given a trained multimodal model, a dataset, a batch size, some operators to predict and a threshold, 
     calculates and returns accuracy metrics and confusion matrix.'''
+    # creating DataLoader
+    dataloader = DataLoader(dataset=dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_raster_vector)
+
+    # switch model to evaluation mode
+    model.eval()
+
     # storing the predictions and true labels from every batch for every operator
     true_operators_all = {}
     pred_operators_all = {}
