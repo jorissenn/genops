@@ -97,7 +97,7 @@ def plot_graph(graph, ax, position=True, labels=False, node_color=None, node_col
     if labels:
         nx.draw_networkx_labels(G=graph, pos=pos, font_size=12, font_color="white")
 
-def visualize_operator_distribution(buildings, operators, save=False, path=None):
+def visualize_operator_distribution(buildings, operators, save=False, path=None, figsize=(10,6), display_ratio=False, display_legend=True, display_ylabel=True):
     '''Plots the distribution of the given generalization operators within a buildings DataFrame individually in a barplot.'''
     prevalences = {
         "not present": [],
@@ -115,26 +115,40 @@ def visualize_operator_distribution(buildings, operators, save=False, path=None)
             
         prevalences["present"].append(n_present)
         prevalences["not present"].append(n_not_present)
-            
+    
     width = 0.5
     
     fig, ax = plt.subplots(figsize=figsize)
     bottom = np.zeros(len(operators))
     
+    total_buildings = buildings.shape[0]
+    
     for boolean, prevalence in prevalences.items():
+        if display_ratio:
+            prevalence = [count / total_buildings for count in prevalence]  # Convert counts to ratio
         p = ax.bar(operators, prevalence, width, label=boolean, bottom=bottom, edgecolor="black", color=color_map[boolean])
         bottom += prevalence
         
     for bar in ax.patches:
-        ax.text(x = bar.get_x() + bar.get_width() / 2,
-                y = bar.get_height() / 2 + bar.get_y(),
-                s = f'{bar.get_height() / buildings.shape[0] * 100:.1f}%', ha = 'center',
-                color = 'black' if bar.get_facecolor() != (0.0, 0.0, 0.0, 1.0) else 'white', weight = 'bold', size = 13)
+        if display_ratio:
+            ax.text(x = bar.get_x() + bar.get_width() / 2,
+                    y = bar.get_height() / 2 + bar.get_y(),
+                    s = f'{bar.get_height() * 100:.1f}%', ha = 'center',
+                    color = 'black' if bar.get_facecolor() != (0.0, 0.0, 0.0, 1.0) else 'white', weight = 'bold', size = 14)
+        else:
+            ax.text(x = bar.get_x() + bar.get_width() / 2,
+                    y = bar.get_height() / 2 + bar.get_y(),
+                    s = f'{bar.get_height() / buildings.shape[0] * 100:.1f}%', ha = 'center',
+                    color = 'black' if bar.get_facecolor() != (0.0, 0.0, 0.0, 1.0) else 'white', weight = 'bold', size = 14)
     
-    ax.set_ylabel('Number of buildings', fontsize=15)
+    if display_ylabel:
+        ax.set_ylabel('Number of buildings' if not display_ratio else 'Proportion of buildings', fontsize=15)
     
     # set the formatter for the y-axis to use non-scientific notation
-    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{int(x):,}'))
+    if not display_ratio:
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f'{int(x):,}'))
+    else:
+        ax.yaxis.set_major_formatter(ticker.PercentFormatter(xmax=1.0))
     
     # capitalize x-axis labels
     ax.set_xticklabels([label.get_text().capitalize() for label in ax.get_xticklabels()])
@@ -143,9 +157,10 @@ def visualize_operator_distribution(buildings, operators, save=False, path=None)
     order = [1,0]
     
     ax.tick_params(axis='both', which='major', labelsize=14)
-    ax.legend([handles[idx] for idx in order],
-              [labels[idx] for idx in order],
-              loc='center left', bbox_to_anchor=(1, 0.5), frameon=False, prop={'size': 14, 'weight': 'bold'})
+    if display_legend:
+        ax.legend([handles[idx] for idx in order],
+                  [labels[idx] for idx in order],
+                  loc='center left', bbox_to_anchor=(1, 0.5), frameon=False, prop={'size': 14, 'weight': 'bold'})
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
