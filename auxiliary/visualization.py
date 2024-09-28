@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.ticker import MultipleLocator
 from matplotlib.colors import ListedColormap
 import numpy as np
 import pandas as pd
@@ -195,23 +196,22 @@ def visualize_labelset_distribution(buildings, labels, save=False, path=None):
     if save:
         fig.savefig(path, bbox_inches="tight")
 
-def visualize_losses(loss_files, path_to_loss_files, save=False, output_path=None):
-    '''Given a list of files containing CSV files with training and validation loss, creates a graph that visualizes the loss curves.'''
+def visualize_losses(loss_file, path_to_loss_files, save=False, output_path=None):
+    '''Given the name of and path to a CSV file with training and validation loss, creates a graph that visualizes the loss curves.'''
     plt.figure(figsize=figsize)
     plt.xlabel("Epoch", fontsize=15)
     plt.ylabel("Loss", fontsize=15)
 
-    for loss_file in loss_files:
-        loss_file_path = os.path.join(path_to_loss_files, loss_file)
-        cur_loss = pd.read_csv(loss_file_path)
+    loss_file_path = os.path.join(path_to_loss_files, loss_file)
+    cur_loss = pd.read_csv(loss_file_path)
 
-        epochs = list(range(1, cur_loss.shape[0] + 1))
+    epochs = list(range(1, cur_loss.shape[0] + 1))
         
-        cur_training_loss = cur_loss["training_loss"]
-        cur_validation_loss = cur_loss["validation_loss"]
+    cur_training_loss = cur_loss["training_loss"]
+    cur_validation_loss = cur_loss["validation_loss"]
         
-        plt.plot(epochs, cur_training_loss, color="orange", label="training loss")
-        plt.plot(epochs, cur_validation_loss, color="red", label="validation loss")
+    plt.plot(epochs, cur_training_loss, color="orange", label="training loss")
+    plt.plot(epochs, cur_validation_loss, color="red", label="validation loss")
 
     # Set the x-axis to use integer locator
     ax = plt.gca()  # Get the current axis
@@ -226,6 +226,80 @@ def visualize_losses(loss_files, path_to_loss_files, save=False, output_path=Non
 
     if save:
         fig.savefig(output_path, bbox_inches="tight")
+
+def visualize_multiple_losses(loss_files, path_to_data, model, save=False, output_path=None, figsize=(10,6)):
+    '''Given the names of and paths to CSV files with training and validation losses, creates two figures that visualize 
+    the training and validation loss curves respectively.'''
+    assert model in ("raster", "vector", "multimodal")
+    # path to the model outputs
+    path_to_model_outputs = os.path.join(path_to_data, model, "model_outputs")
+
+    # generate separate figures for training and validation loss
+    fig_training, ax_training = plt.subplots(1, 1, figsize=figsize)
+    fig_validation, ax_validation = plt.subplots(1, 1, figsize=figsize)
+
+    # getting full operator names from abbreviations
+    operator_map = {"eli": "elimination", "sel": "selection"}
+
+    # colors to use for the losses
+    colors = ["gold", "darkorange", "lightblue", "royalblue"]
+
+    # initialize min and max loss values
+    min_loss = np.inf
+    max_loss = -np.inf
+
+    for i, loss_file in enumerate(loss_files):
+        # determine architecture and operators from filename
+        loss_file_split = loss_file.split("_")
+        architecture = loss_file_split[0]
+        operator = operator_map[loss_file_split[1]]
+
+        # path to losses
+        loss_file_path = os.path.join(path_to_model_outputs, operator, "losses", loss_file)
+        cur_loss = pd.read_csv(loss_file_path)
+
+        # get number of epochs
+        epochs = list(range(1, cur_loss.shape[0]+1))
+
+        # get training and validation losses
+        cur_training_loss = cur_loss["training_loss"]
+        cur_validation_loss = cur_loss["validation_loss"]
+
+        # update min and max loss values
+        min_loss = min(min_loss, cur_training_loss.min(), cur_validation_loss.min())
+        max_loss = max(max_loss, cur_training_loss.max(), cur_validation_loss.max())
+
+        # plot the losses on the respective figure
+        ax_training.plot(epochs, cur_training_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
+        ax_validation.plot(epochs, cur_validation_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
+
+    # set the same y-axis limits for both plots
+    ax_training.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
+    ax_validation.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
+    
+    # set axis labels
+    ax_training.set_xlabel("Epoch", fontsize=15)
+    ax_training.set_ylabel("Loss", fontsize=15)
+    ax_validation.set_xlabel("Epoch", fontsize=15)
+
+    # set x-axis tick marks to appear every 5 epochs
+    ax_training.xaxis.set_major_locator(MultipleLocator(5))
+    ax_validation.xaxis.set_major_locator(MultipleLocator(5))
+
+    # set axis parameters
+    ax_training.tick_params(axis="both", which="major", labelsize=14)
+    ax_training.spines["top"].set_visible(False)
+    ax_training.spines["right"].set_visible(False)
+    ax_validation.tick_params(axis="both", which="major", labelsize=14)
+    ax_validation.spines["top"].set_visible(False)
+    ax_validation.spines["right"].set_visible(False)
+
+    ax_validation.legend(loc="center left", bbox_to_anchor=(1, 0.5), frameon=False, prop={'size': 14, 'weight': 'bold'})
+    plt.show()
+
+    if save:
+        fig_training.savefig(os.path.join(output_path, f"losses_{model}_training.png"), bbox_inches="tight")
+        fig_validation.savefig(os.path.join(output_path, f"losses_{model}_validation.png"), bbox_inches="tight")
 
 def visualize_confusion_matrix(conf_matrix, operator):
     '''Visualizes a given confusion matrix.'''
