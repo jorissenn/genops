@@ -248,6 +248,9 @@ def visualize_multiple_losses(loss_files, path_to_data, model, save=False, outpu
     min_loss = np.inf
     max_loss = -np.inf
 
+    # initialize max epoch
+    max_epoch = -np.inf
+
     for i, loss_file in enumerate(loss_files):
         # determine architecture and operators from filename
         loss_file_split = loss_file.split("_")
@@ -269,6 +272,9 @@ def visualize_multiple_losses(loss_files, path_to_data, model, save=False, outpu
         min_loss = min(min_loss, cur_training_loss.min(), cur_validation_loss.min())
         max_loss = max(max_loss, cur_training_loss.max(), cur_validation_loss.max())
 
+        # update max epoch
+        max_epoch = max(max_epoch, max(epochs))
+
         # plot the losses on the respective figure
         ax_training.plot(epochs, cur_training_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
         ax_validation.plot(epochs, cur_validation_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
@@ -276,6 +282,10 @@ def visualize_multiple_losses(loss_files, path_to_data, model, save=False, outpu
     # set the same y-axis limits for both plots
     ax_training.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
     ax_validation.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
+
+    # set x-axis limits for both plots
+    ax_training.set_xlim([1, max_epoch])
+    ax_validation.set_xlim([1, max_epoch])
     
     # set axis labels
     ax_training.set_xlabel("Epoch", fontsize=15)
