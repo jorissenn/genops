@@ -227,7 +227,7 @@ def visualize_losses(loss_file, path_to_loss_files, save=False, output_path=None
     if save:
         fig.savefig(output_path, bbox_inches="tight")
 
-def visualize_multiple_losses(loss_files, path_to_data, model, save=False, output_path=None, figsize=(10,6)):
+def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, save=False, output_path=None, figsize=(10,6)):
     '''Given the names of and paths to CSV files with training and validation losses, creates two figures that visualize 
     the training and validation loss curves respectively.'''
     assert model in ("raster", "vector", "multimodal")
@@ -293,8 +293,8 @@ def visualize_multiple_losses(loss_files, path_to_data, model, save=False, outpu
     ax_validation.set_xlabel("Epoch", fontsize=15)
 
     # set x-axis tick marks to appear every 5 epochs
-    ax_training.xaxis.set_major_locator(MultipleLocator(5))
-    ax_validation.xaxis.set_major_locator(MultipleLocator(5))
+    ax_training.xaxis.set_major_locator(MultipleLocator(epochs_every))
+    ax_validation.xaxis.set_major_locator(MultipleLocator(epochs_every))
 
     # set axis parameters
     ax_training.tick_params(axis="both", which="major", labelsize=14)
