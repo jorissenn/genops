@@ -35,6 +35,7 @@ def load_trained_raster_model(model_filename, raster_path, device):
 
     # initialize the model
     model = initialize_raster_model(architecture, operators_to_predict, attach_roads)
+    model.to(device)
 
     # load raster model from checkpoint
     model_path = os.path.join(raster_path, "models", operator_model)

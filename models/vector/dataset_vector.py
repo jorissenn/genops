@@ -1,6 +1,12 @@
+import sys
+sys.path.append("..")
+
 import os
 import torch
 from torch_geometric.data import Dataset
+
+from features import feature_order
+from models.operators import operator_order
 
 def process_HeteroData(sample, operators, features, attach_roads=True):
     '''Processes a raw HeteroData object as loaded from a .pt file by removing road nodes and edges if specified and returning only the specified features and operators.'''
@@ -20,7 +26,7 @@ def process_HeteroData(sample, operators, features, attach_roads=True):
 
     return sample
 
-def get_dummy_sample(path, operators, operator_order, features, feature_order, attach_roads=True):
+def get_dummy_sample(path, operators, features, attach_roads=True):
     '''Given a path, reads and processes a dummy sample that can be used to initialize the GNNs.'''
     # store indices of the operators within operator_order
     operators = sorted([operator_order.index(operator) for operator in operators if operator in operator_order])
@@ -36,7 +42,7 @@ def get_dummy_sample(path, operators, operator_order, features, feature_order, a
     return dummy_sample
 
 class BuildingVectorDataset(Dataset):
-    def __init__(self, path, operators, operator_order, features, feature_order, attach_roads=True, transform=None, subset=None):
+    def __init__(self, path, operators, features, attach_roads=True, transform=None, subset=None):
         '''Stores the directory and filenames of the individual .pt files.'''
         super().__init__(path, transform)
         # store directory of individual files
