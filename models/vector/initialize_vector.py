@@ -81,6 +81,6 @@ def load_trained_vector_model(model_filename, vector_path, device):
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     
-    print("Model successfully loaded.")
+    print("Vector model successfully loaded.")
 
     return model

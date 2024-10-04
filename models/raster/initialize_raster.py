@@ -1,8 +1,13 @@
+import sys
+sys.path.append("..")
+
 import os
 import torch
 
 from cnn import CNN
 from vit import ViT
+
+from models.operators import elimination_operators, selection_operators
 
 def initialize_raster_model(architecture, operators_to_predict, attach_roads):
     '''Initializes a raster model given an architecture and model.'''
@@ -21,11 +26,6 @@ def load_trained_raster_model(model_filename, raster_path, device):
     '''Loads a trained raster model given a filename.'''
     operator_model_map = {"eli": "elimination", "sel": "selection"}
     
-    # operators for the elimination models
-    elimination_operators = ["elimination"]
-    # operators for the selection models
-    selection_operators = ["aggregation", "typification", "displacement", "enlargement"]
-    
     # extract necessary information from model filename
     model_filename_split = model_filename.split("_")
     architecture = model_filename_split[0].lower()
@@ -43,6 +43,6 @@ def load_trained_raster_model(model_filename, raster_path, device):
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
     
-    print("Model successfully loaded.")
+    print("Raster model successfully loaded.")
 
     return model

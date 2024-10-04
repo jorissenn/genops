@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import os
 import numpy as np
 import torch
@@ -5,6 +8,9 @@ from torch.utils.data import Dataset
 from torch_geometric.data import Batch
 from dataset_raster import npz_to_tensor
 from dataset_vector import process_HeteroData
+
+from features import feature_order
+from models.operators import operator_order
 
 def collate_raster_vector(batch):
     '''Custom collate function to generate batches containing both tensors and HeteroData objects, as DataLoader cannot collate HeteroData objects by default.'''
@@ -25,9 +31,7 @@ class BuildingMultimodalDataset(Dataset):
                  raster_path, 
                  vector_path, 
                  operators, 
-                 operator_order, 
                  features, 
-                 feature_order, 
                  attach_roads=True, 
                  raster_transform=None, 
                  vector_transform=None, 
