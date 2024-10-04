@@ -251,7 +251,10 @@ def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, s
     # initialize max epoch
     max_epoch = -np.inf
 
-    for i, loss_file in enumerate(loss_files):
+    # early stopping point size
+    point_size = 75
+
+    for i, (loss_file, epochs_early_stopping) in enumerate(loss_files.items()):
         # determine architecture and operators from filename
         loss_file_split = loss_file.split("_")
         architecture = loss_file_split[0]
@@ -276,16 +279,26 @@ def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, s
         max_epoch = max(max_epoch, max(epochs))
 
         # plot the losses on the respective figure
-        ax_training.plot(epochs, cur_training_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
-        ax_validation.plot(epochs, cur_validation_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i])
+        ax_training.plot(epochs, cur_training_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i], zorder=1)
+        ax_validation.plot(epochs, cur_validation_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i], zorder=1)
+
+        # store the loss value at the epoch determined through early stopping
+        loss_early_stopping_training = cur_loss[cur_loss["epoch"] == epochs_early_stopping]["training_loss"].item()
+        loss_early_stopping_validation = cur_loss[cur_loss["epoch"] == epochs_early_stopping]["validation_loss"].item()
+
+        ax_training.scatter(epochs_early_stopping, loss_early_stopping_training, color=colors[i], s=point_size, zorder=2)
+        ax_validation.scatter(epochs_early_stopping, loss_early_stopping_validation, color=colors[i], s=point_size, zorder=2)
+
+    # add dummy scatter plot for the legend
+    ax_validation.scatter([], [], zorder=2, color="black", s=point_size, label="Early stopping")
 
     # set the same y-axis limits for both plots
     ax_training.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
     ax_validation.set_ylim([min_loss-0.05 * min_loss, max_loss+0.05 * min_loss])
 
     # set x-axis limits for both plots
-    ax_training.set_xlim([1, max_epoch])
-    ax_validation.set_xlim([1, max_epoch])
+    ax_training.set_xlim([1, max_epoch+5])
+    ax_validation.set_xlim([1, max_epoch+5])
     
     # set axis labels
     ax_training.set_xlabel("Epoch", fontsize=15)
