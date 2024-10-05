@@ -28,7 +28,7 @@ def get_model_name(model, ops, attach_roads, n_samples, n_epochs, batch_size, de
     '''Given a Pytorch model and its associated metadata, outputs a unique name that identifies the model which is used for saving logs.'''
     type = model.__class__.__name__
     if type == "MultimodalModel":
-        type = "Multimodal" + (model.raster_model.__class__.__name__ + model.vector_model.__class__.__name__)
+        type = f"{model.raster_model.__class__.__name__}+{model.vector_model.__class__.__name__}"
     n_params = model.get_n_parameters()
     return f"{type}_{ops}_attachRoads{attach_roads}_{n_params}p_{n_samples}s_{n_epochs}ep_bs{batch_size}_{device}"
     

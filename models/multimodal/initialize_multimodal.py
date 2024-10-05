@@ -17,14 +17,9 @@ from model_multimodal import MultimodalModel
 
 from models.operators import elimination_operators, selection_operators
 
-def load_trained_multimodal_model(architecture, model_filename, multimodal_path, raster_path, vector_path, device):
+def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, vector_path, device):
     '''Loads a trained multimodal model given a filename.'''
     operator_model_map = {"eli": "elimination", "sel": "selection"}
-    
-    # extract individual architectures
-    architecture_raster, architecture_vector = architecture.split("+")[0], architecture.split("+")[1]
-    assert architecture_raster in ("cnn", "vit")
-    assert architecture_vector in ("hgnn", "hgt")
 
     # extract necessary information from model filename
     model_filename_split = model_filename.split("_")
@@ -32,6 +27,11 @@ def load_trained_multimodal_model(architecture, model_filename, multimodal_path,
     operator_model = operator_model_map[model_filename_split[1]]
     operators_to_predict = elimination_operators if operator_model == "elimination" else selection_operators
     attach_roads = True if model_filename_split[2] == "attachRoadsTrue" else False
+
+    # extract individual architectures
+    architecture_raster, architecture_vector = architecture.split("+")[0].lower(), architecture.split("+")[1].lower()
+    assert architecture_raster in ("cnn", "vit")
+    assert architecture_vector in ("hgnn", "hgt")
 
     # define important features
     features = important_features[f"{architecture_vector.upper()} {operator_model}"]

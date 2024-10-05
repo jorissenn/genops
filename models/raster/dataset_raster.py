@@ -69,3 +69,48 @@ class BuildingRasterDataset(Dataset):
         operators = torch.stack(operators, dim=0).float()
 
         return block, operators
+
+class BuildingRasterDatasetUUID(Dataset):
+    def __init__(self, path, operators, uuid, attach_roads=True, transform=None):
+        '''Stores the filename of a single .npz file associated with the specified uuid.'''
+        # store directory of individual files
+        self.path = path
+        # search for the file associated with the provided UUID
+        filenames = [file for file in os.listdir(path) if file.endswith(".npz")]
+        uuid_index = next(index for index, filename in enumerate(filenames) if uuid in filename)
+        self.filenames = [filenames[uuid_index]]
+
+        # store indices of the operators within operator_order for slicing in the .__getitem__() method
+        self.operators = operators
+
+        # store information on whether roads should be attached
+        self.attach_roads = attach_roads
+
+        # store transformation
+        self.transform = transform
+
+    def __len__(self):
+        '''Enables dataset length calculation.'''
+        return len(self.filenames)
+
+    def __getitem__(self, index):
+        '''Enables indexing, returns block raster as features and generalization operators as label.'''
+        # get filename associated with given index
+        filename = self.filenames[index]
+
+        # load the file with the filename
+        sample = np.load(os.path.join(self.path, filename))
+
+        # convert loaded file to tensor
+        block = npz_to_tensor(sample, attach_roads=self.attach_roads)
+
+        if self.transform:
+            block = self.transform(block)
+
+        # collect labels according to specified generalization operators
+        operators = [torch.from_numpy(sample[operator]).float() for operator in self.operators]
+
+        # stack the operators to a tensor
+        operators = torch.stack(operators, dim=0).float()
+
+        return block, operators

@@ -10,9 +10,9 @@ from dataset_vector import get_dummy_sample
 from features import important_features
 from models.operators import elimination_operators, selection_operators
 
-def initialize_vector_model(model, sample, **kwargs):
-    '''Lazy initializes the specified heterogeneous GNN model using the metadata from a single training sample.'''
-    assert model in ("hgnn", "hgt")
+def initialize_vector_model(architecture, sample, **kwargs):
+    '''Lazy initializes the specified heterogeneous GNN architecture using the metadata from a single training sample.'''
+    assert architecture in ("hgnn", "hgt")
 
     # extract necessary metadata
     node_types = sample.node_types
@@ -29,13 +29,13 @@ def initialize_vector_model(model, sample, **kwargs):
     metadata = sample.metadata()
     
     # creating model and moving to device
-    if model == "hgnn":
+    if architecture == "hgnn":
         model = HGNN(hidden_channels=kwargs["hidden_channels"], 
                      out_channels=n_classes, 
                      num_layers=kwargs["num_layers"], 
                      metadata=metadata, 
                      node_to_predict=kwargs["node_to_predict"])
-    elif model == "hgt":
+    elif architecture == "hgt":
         model = HGT(hidden_channels=kwargs["hidden_channels"], 
                     out_channels=n_classes, 
                     num_heads=kwargs["num_heads"], 
@@ -72,7 +72,7 @@ def load_trained_vector_model(model_filename, vector_path, device):
                                     attach_roads=attach_roads)
 
     # initialize the model
-    model = initialize_vector_model(model=architecture, sample=dummy_sample, hidden_channels=128, num_heads=8, num_layers=3, node_to_predict="focal_building")
+    model = initialize_vector_model(architecture=architecture, sample=dummy_sample, hidden_channels=128, num_heads=8, num_layers=3, node_to_predict="focal_building")
     model.to(device)
 
     # load vector model from checkpoint

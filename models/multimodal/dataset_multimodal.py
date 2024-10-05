@@ -98,3 +98,76 @@ class BuildingMultimodalDataset(Dataset):
             vector_sample = self.vector_transform(vector_sample)
 
         return raster_sample, vector_sample, operators
+
+class BuildingMultimodalDatasetUUID(Dataset):
+    def __init__(self, 
+                 raster_path, 
+                 vector_path, 
+                 operators, 
+                 features, 
+                 uuid,
+                 attach_roads=True, 
+                 raster_transform=None, 
+                 vector_transform=None):
+        '''Stores the filename of a single raster (.npz) and vector (.pt) file associated with the specified uuid.'''
+        # store the path to the raster and vector files
+        self.raster_path = raster_path
+        self.vector_path = vector_path
+
+        # get filenames of the individual files, sort the filenames to make them line up, search for the file associated with the provided UUID
+        raster_filenames = sorted([file for file in os.listdir(raster_path) if file.endswith(".npz")])
+        uuid_index_raster = next(index for index, filename in enumerate(raster_filenames) if uuid in filename)
+        self.raster_filenames = [raster_filenames[uuid_index_raster]]
+        vector_filenames = sorted([file for file in os.listdir(vector_path) if file.endswith(".pt")])
+        uuid_index_vector = next(index for index, filename in enumerate(vector_filenames) if uuid in filename)
+        self.vector_filenames = [vector_filenames[uuid_index_vector]]
+
+        # make sure that the samples line up
+        assert len(self.raster_filenames) == len(self.vector_filenames)
+        assert uuid_index_raster == uuid_index_vector
+
+        # store indices of the operators within operator_order for slicing in the __getitem__ method
+        self.operators = sorted([operator_order.index(operator) for operator in operators if operator in operator_order])
+        # store indices of the features within feature_order for slicing in the __getitem__ method
+        self.features = sorted([feature_order.index(feature) for feature in features if feature in feature_order])
+
+        # store information on whether roads should be attached
+        self.attach_roads = attach_roads
+
+        # store transformations
+        self.raster_transform = raster_transform
+        self.vector_transform = vector_transform
+
+    def __len__(self):
+        '''Enables dataset length calculation.'''
+        return len(self.raster_filenames)
+
+    def __getitem__(self, index):
+        '''Enables indexing, returns graph and raster representation and generalization operator as label.'''
+        # load the raster sample associated with the given index
+        raster_filename = self.raster_filenames[index]
+        raster_sample_raw = np.load(os.path.join(self.raster_path, raster_filename))
+
+        # convert loaded file to tensor
+        raster_sample = npz_to_tensor(raster_sample_raw, attach_roads=self.attach_roads)
+
+        if self.raster_transform:
+            raster_sample = self.raster_transform(raster_sample)
+
+        # load the vector sample associated with the given index
+        vector_filename = self.vector_filenames[index]
+        vector_sample_raw = torch.load(os.path.join(self.vector_path, vector_filename))
+
+        # process the raw HeteroData object according to the information specified in the init method
+        vector_sample = process_HeteroData(vector_sample_raw, 
+                                           operators=self.operators, 
+                                           features=self.features, 
+                                           attach_roads=self.attach_roads)
+
+        # extract the operators from the graph object
+        operators = vector_sample.y
+
+        if self.vector_transform:
+            vector_sample = self.vector_transform(vector_sample)
+
+        return raster_sample, vector_sample, operators

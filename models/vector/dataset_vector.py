@@ -84,3 +84,46 @@ class BuildingVectorDataset(Dataset):
             graph = self.transform(graph)
 
         return sample
+
+class BuildingVectorDatasetUUID(Dataset):
+    def __init__(self, path, operators, features, uuid, attach_roads=True, transform=None):
+        '''Stores the filename of a single .pt file associated with the specified uuid.'''
+        super().__init__(path, transform)
+        # store directory of individual files
+        self.path = path
+        # search for the file associated with the provided UUID
+        filenames = [file for file in os.listdir(path) if file.endswith(".pt")]
+        uuid_index = next(index for index, filename in enumerate(filenames) if uuid in filename)
+        self.filenames = [filenames[uuid_index]]
+
+        # store indices of the operators within operator_order for slicing in the .get() method
+        self.operators = sorted([operator_order.index(operator) for operator in operators if operator in operator_order])
+        # store indices of the features within feature_order for slicing in the .get() method
+        self.features = sorted([feature_order.index(feature) for feature in features if feature in feature_order])
+
+        # store information on whether roads should be attached
+        self.attach_roads = attach_roads
+
+        # store transformation
+        self.transform = transform
+
+    def len(self):
+        '''Enables dataset length calculation.'''
+        return len(self.filenames)
+
+    def get(self, index):
+        '''Enables indexing, returns HeteroData object which contains nodes, edges and labels.'''
+        # get filename associated with given index
+        filename = self.filenames[index]
+
+        # load the file with the filename
+        sample_raw = torch.load(os.path.join(self.path, filename))
+
+        # process the raw HeteroData object according to the information specified in the init method
+        sample = process_HeteroData(sample_raw, operators=self.operators, features=self.features, attach_roads=self.attach_roads)
+
+        # apply given transformation if specified
+        if self.transform:
+            graph = self.transform(graph)
+
+        return sample
