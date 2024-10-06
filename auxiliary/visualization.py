@@ -227,7 +227,7 @@ def visualize_losses(loss_file, path_to_loss_files, save=False, output_path=None
     if save:
         fig.savefig(output_path, bbox_inches="tight")
 
-def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, save=False, output_path=None, figsize=(10,6)):
+def visualize_multiple_losses(loss_files, path_to_data, model, colors, epochs_every=5, save=False, output_path=None, figsize=(10,6)):
     '''Given the names of and paths to CSV files with training and validation losses, creates two figures that visualize 
     the training and validation loss curves respectively.'''
     assert model in ("raster", "vector", "multimodal")
@@ -240,9 +240,7 @@ def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, s
 
     # getting full operator names from abbreviations
     operator_map = {"eli": "elimination", "sel": "selection"}
-
-    # colors to use for the losses
-    colors = ["gold", "darkorange", "lightblue", "royalblue"]
+    operator_map_legend = {"eli": "elimination", "sel": "multi-operator"}
 
     # initialize min and max loss values
     min_loss = np.inf
@@ -279,8 +277,8 @@ def visualize_multiple_losses(loss_files, path_to_data, model, epochs_every=5, s
         max_epoch = max(max_epoch, max(epochs))
 
         # plot the losses on the respective figure
-        ax_training.plot(epochs, cur_training_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i], zorder=1)
-        ax_validation.plot(epochs, cur_validation_loss, label=f"{operator.capitalize()} with {architecture}", color=colors[i], zorder=1)
+        ax_training.plot(epochs, cur_training_loss, label=f"{operator_map_legend[loss_file_split[1]].capitalize()}, {architecture}", color=colors[i], zorder=1)
+        ax_validation.plot(epochs, cur_validation_loss, label=f"{operator_map_legend[loss_file_split[1]].capitalize()}, {architecture}", color=colors[i], zorder=1)
 
         # store the loss value at the epoch determined through early stopping
         loss_early_stopping_training = cur_loss[cur_loss["epoch"] == epochs_early_stopping]["training_loss"].item()
