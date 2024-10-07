@@ -110,7 +110,7 @@ def get_pr_roc(model, dataset, batch_size, operators_to_pred, device, interval, 
 
     return metrics_df
 
-def plot_pr_curve(pr_roc_files, threshold_labels=False):
+def plot_pr_curve(pr_roc_files, validation, legend_order, figsize=(10,6), save=False, output_path=None):
     '''Given a list of files with accuracy metrics as output by get_pr_roc, plots the precision-recall curve.'''
     # concatenate all of the input files into one DataFrame
     metrics = pd.DataFrame()
@@ -129,8 +129,13 @@ def plot_pr_curve(pr_roc_files, threshold_labels=False):
     thresholds = precision_recall_data.columns[2:]
 
     # initialize the figure
-    fig, ax = plt.subplots(figsize=(10,6))
-    colors = plt.get_cmap("brg")
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # define colors for the operators
+    colors = ["tab:blue", "tab:brown", "tab:green", "blueviolet", "tab:orange"]
+
+    # marker size for the optimal threshold
+    markersize = 200
 
     # plot the PR curve for every operator
     for i, operator in enumerate(operators):
@@ -141,16 +146,27 @@ def plot_pr_curve(pr_roc_files, threshold_labels=False):
         # calculate AUC
         operator_auc = get_auc(recall, precision)
         
-        color = colors(i / len(operators))
-        ax.plot(recall, precision, marker="o", label=f"{operator.capitalize()} (AUC = {operator_auc:.2f})", color=color)
-
-        if threshold_labels:
+        color = colors[i]
+        if validation:
             # identify the optimal threshold: the threshold closest to (1,1)
             optimal_threshold_idx = get_closest_point(x=recall, y=precision, target_point=(1,1))
 
-            # add label with the optimal threshold to the plot
-            plt.text(recall[optimal_threshold_idx]+0.01, precision[optimal_threshold_idx]+0.01, f"{float(thresholds[optimal_threshold_idx]):.2f}", 
-                fontsize=12, ha="left", color=color, path_effects=[withStroke(linewidth=3, foreground='white')])
+            ax.plot(recall, precision, marker="o", label=f"{operator.capitalize()} (threshold = {float(thresholds[optimal_threshold_idx]):.2f})", color=color)
+            # plot the optimal threshold as a triangle
+            ax.scatter(recall[optimal_threshold_idx], precision[optimal_threshold_idx], marker="^", color=color, s=markersize)
+        else:
+            ax.plot(recall, precision, marker="o", label=f"{operator.capitalize()} (AUC = {operator_auc:.2f})", color=color)
+
+    # add the triangle to the legend
+    if validation:
+        ax.scatter([], [], marker="^", color="black", s=markersize, label="Optimal threshold")
+
+    # reorder the legend with respect to the input
+    handles, labels = ax.get_legend_handles_labels()
+    order = [list(operators).index(operator) for operator in legend_order]
+    
+    if validation:
+        order.append(len(order))
 
     # customize axes
     ax.set_xlabel("Recall", fontsize=15)
@@ -162,9 +178,14 @@ def plot_pr_curve(pr_roc_files, threshold_labels=False):
     ax.spines["right"].set_visible(False)
     ax.set_aspect("equal", adjustable="box")
 
-    ax.legend(frameon=False, fontsize=12)
+    ax.legend([handles[idx] for idx in order], [labels[idx] for idx in order], frameon=False, fontsize=12)
 
-def plot_roc_curve(pr_roc_files, threshold_labels=False):
+    plt.show()
+
+    if save:
+        fig.savefig(output_path, bbox_inches="tight")
+
+def plot_roc_curve(pr_roc_files, validation, legend_order, figsize=(10,6), save=False, output_path=None):
     '''Given a list of files with accuracy metrics as output by get_pr_roc, plots the ROC curve.'''
     # concatenate all of the input files into one DataFrame
     metrics = pd.DataFrame()
@@ -183,8 +204,13 @@ def plot_roc_curve(pr_roc_files, threshold_labels=False):
     thresholds = fpr_tpr_data.columns[2:]
 
     # initialize the figure
-    fig, ax = plt.subplots(figsize=(10,6))
-    colors = plt.get_cmap("brg")
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # define colors for the operators
+    colors = ["tab:blue", "tab:brown", "tab:green", "blueviolet", "tab:orange"]
+
+    # marker size for the optimal threshold
+    markersize = 200
 
     # plot the ROC curve for every operator
     for i, operator in enumerate(operators):
@@ -195,16 +221,27 @@ def plot_roc_curve(pr_roc_files, threshold_labels=False):
         # calculate AUC
         operator_auc = get_auc(fpr, tpr)
         
-        color = colors(i / len(operators))
-        ax.plot(fpr, tpr, marker="o", label=f"{operator.capitalize()} (AUC = {operator_auc:.2f})", color=color)
-
-        if threshold_labels:
+        color = colors[i]
+        if validation:
             # identify the optimal threshold: the threshold closest to (0,1)
             optimal_threshold_idx = get_closest_point(x=fpr, y=tpr, target_point=(0,1))
 
-            # add label with the optimal threshold to the plot
-            plt.text(fpr[optimal_threshold_idx]+0.01, tpr[optimal_threshold_idx]+0.01, f"{float(thresholds[optimal_threshold_idx]):.2f}", 
-                fontsize=12, ha="left", color=color, path_effects=[withStroke(linewidth=3, foreground='white')])
+            ax.plot(fpr, tpr, marker="o", label=f"{operator.capitalize()} (threshold = {float(thresholds[optimal_threshold_idx]):.2f})", color=color)
+            # plot the optimal threshold as a triangle
+            ax.scatter(fpr[optimal_threshold_idx], tpr[optimal_threshold_idx], marker="^", color=color, s=markersize)
+        else:
+            ax.plot(fpr, tpr, marker="o", label=f"{operator.capitalize()} (AUC = {operator_auc:.2f})", color=color)
+
+    # add the triangle to the legend
+    if validation:
+        ax.scatter([], [], marker="^", color="black", s=markersize, label="Optimal threshold")
+
+    # reorder the legend with respect to the input
+    handles, labels = ax.get_legend_handles_labels()
+    order = [list(operators).index(operator) for operator in legend_order]
+    
+    if validation:
+        order.append(len(order))
 
     # customize axes
     ax.set_xlabel("False positive rate", fontsize=15)
@@ -216,4 +253,9 @@ def plot_roc_curve(pr_roc_files, threshold_labels=False):
     ax.spines["right"].set_visible(False)
     ax.set_aspect("equal", adjustable="box")
 
-    ax.legend(frameon=False, fontsize=12)
+    ax.legend([handles[idx] for idx in order], [labels[idx] for idx in order], frameon=False, fontsize=12)
+
+    plt.show()
+
+    if save:
+        fig.savefig(output_path, bbox_inches="tight")
