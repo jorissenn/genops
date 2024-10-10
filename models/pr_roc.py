@@ -51,7 +51,8 @@ def get_pr_roc(model, dataset, batch_size, operators_to_pred, device, interval, 
         raise NotImplementedError
 
     # generate thresholds to test
-    thresholds = np.arange(interval[0], interval[1], step=increment)
+    num_increments = int((interval[1] - interval[0]) / increment) + 1
+    thresholds = np.linspace(interval[0], interval[1], num=num_increments)
 
     # prepare dictionary with results
     metrics_dic = {"operator": [], "metric": []}

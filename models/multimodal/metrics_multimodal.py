@@ -59,8 +59,8 @@ def get_metrics_multimodal(model, dataset, batch_size, operators_to_pred, thresh
         # calculate metrics of the current operator
         conf_matrix = confusion_matrix(cur_true_operator.numpy(), cur_pred_operator.numpy())
         accuracy = accuracy_score(cur_true_operator.numpy(), cur_pred_operator.numpy())
-        precision = precision_score(cur_true_operator.numpy(), cur_pred_operator.numpy())
-        recall = recall_score(cur_true_operator.numpy(), cur_pred_operator.numpy())
+        precision = precision_score(cur_true_operator.numpy(), cur_pred_operator.numpy(), zero_division=1.0)
+        recall = recall_score(cur_true_operator.numpy(), cur_pred_operator.numpy(), zero_division=0.0)
         f1 = f1_score(cur_true_operator.numpy(), cur_pred_operator.numpy())
     
         # store the metrics of the current operator
