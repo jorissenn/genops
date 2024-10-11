@@ -66,7 +66,7 @@ def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, 
                 raise NotImplementedError
         elif architecture_raster == "vit":
             if attach_roads:
-                raster_model_filename = "ViT_eli_attachRoadsTrue_20586241p_100000s_20ep_bs512_cuda.pth"
+                raster_model_filename = "ViT_eli_attachRoadsTrue_20586241p_100000s_100ep_bs512_cuda.pth"
             else:
                 raise NotImplementedError
     
