@@ -66,7 +66,7 @@ def get_pr_roc(model, dataset, batch_size, operators_to_pred, device, interval, 
         metrics_dic[str(threshold)] = []
 
     # get metrics for every threshold
-    for threshold in thresholds:
+    for i, threshold in enumerate(thresholds):
         if model_name in ("CNN", "ViT"):
             metrics = get_metrics_raster(model=model, 
                                          dataset=dataset,
@@ -105,6 +105,8 @@ def get_pr_roc(model, dataset, batch_size, operators_to_pred, device, interval, 
             cur_conf_matrix = metrics["conf_matrix"][i]
             cur_fpr = cur_conf_matrix[0,1] / np.sum(cur_conf_matrix[0,:])
             metrics_dic[str(threshold)].append(cur_fpr)
+
+        print(f"Threshold {i+1}/{len(thresholds)} processed.")
 
     # convert dictionary to DataFrame
     metrics_df = pd.DataFrame(metrics_dic)
