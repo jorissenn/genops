@@ -17,6 +17,61 @@ from model_multimodal import MultimodalModel
 
 from models.operators import elimination_operators, selection_operators
 
+def get_constituent_model_filenames(architecture, operator_model, attach_roads):
+    '''Given the architecture name of a multimodal model, the model type (elimination / selection) and whether the roads should be attached,
+    get the filenames of the previously trained constituent models.'''
+    # extract individual architectures
+    architecture_raster, architecture_vector = architecture.split("+")[0], architecture.split("+")[1]
+
+    # get the filenames of the trained constituent models
+    if operator_model == "elimination":        
+        if architecture_raster == "cnn":
+            if attach_roads:
+                raster_model_filename = "CNN_eli_attachRoadsTrue_4075585p_100000s_40ep_bs512_cuda.pth"
+            else:
+                raster_model_filename = "CNN_eli_attachRoadsFalse_4067841p_100000s_40ep_bs512_cuda.pth"
+        elif architecture_raster == "vit":
+            if attach_roads:
+                raster_model_filename = "ViT_eli_attachRoadsTrue_20586241p_100000s_100ep_bs512_cuda.pth"
+            else:
+                raster_model_filename = "ViT_eli_attachRoadsFalse_20059905p_100000s_100ep_bs512_cuda.pth"
+    
+        if architecture_vector == "hgnn":
+            if attach_roads:
+                vector_model_filename = "HGNN_eli_attachRoadsTrue_481665p_100000s_80ep_bs512_cuda.pth"
+            else:
+                vector_model_filename = "HGNN_eli_attachRoadsFalse_215937p_100000s_80ep_bs512_cuda.pth"
+        elif architecture_vector == "hgt":
+            if attach_roads:
+                vector_model_filename = "HGT_eli_attachRoadsTrue_700466p_100000s_70ep_bs512_cuda.pth"
+            else:
+                vector_model_filename = "HGT_eli_attachRoadsFalse_452687p_100000s_70ep_bs512_cuda.pth"
+                
+    elif operator_model == "selection":
+        if architecture_raster == "cnn":
+            if attach_roads:
+                raster_model_filename = "CNN_sel_attachRoadsTrue_8893252p_100000s_50ep_bs512_cuda.pth"
+            else:
+                raster_model_filename = "CNN_sel_attachRoadsFalse_8885508p_100000s_50ep_bs512_cuda.pth"
+        elif architecture_raster == "vit":
+            if attach_roads:
+                raster_model_filename = "ViT_sel_attachRoadsTrue_20783620p_100000s_90ep_bs512_cuda.pth"
+            else:
+                raster_model_filename = "ViT_sel_attachRoadsFalse_20257284p_100000s_90ep_bs512_cuda.pth"
+
+        if architecture_vector == "hgnn":
+            if attach_roads:
+                vector_model_filename = "HGNN_sel_attachRoadsTrue_540548p_100000s_80ep_bs512_cuda.pth"
+            else:
+                vector_model_filename = "HGNN_sel_attachRoadsFalse_271236p_100000s_80ep_bs512_cuda.pth"
+        elif architecture_vector == "hgt":
+            if attach_roads:
+                vector_model_filename = "HGT_sel_attachRoadsTrue_750389p_100000s_130ep_bs512_cuda.pth"
+            else:
+                vector_model_filename = "HGT_sel_attachRoadsFalse_502610p_100000s_130ep_bs512_cuda.pth"
+
+    return raster_model_filename, vector_model_filename
+
 def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, vector_path, device):
     '''Loads a trained multimodal model given a filename.'''
     operator_model_map = {"eli": "elimination", "sel": "selection"}
@@ -56,55 +111,7 @@ def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, 
                                                     subset=None)[0][0]
 
     # get the filenames of the trained constituent models
-    if operator_model == "elimination":
-        operators_to_predict = elimination_operators
-        
-        if architecture_raster == "cnn":
-            if attach_roads:
-                raster_model_filename = "CNN_eli_attachRoadsTrue_4075585p_100000s_25ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-        elif architecture_raster == "vit":
-            if attach_roads:
-                raster_model_filename = "ViT_eli_attachRoadsTrue_20586241p_100000s_100ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-    
-        if architecture_vector == "hgnn":
-            if attach_roads:
-                vector_model_filename = "HGNN_eli_attachRoadsTrue_481665p_100000s_80ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-        elif architecture_vector == "hgt":
-            if attach_roads:
-                raise NotImplementedError
-            else:
-                raise NotImplementedError
-                
-    elif operator_model == "selection":
-        operators_to_predict = selection_operators
-        
-        if architecture_raster == "cnn":
-            if attach_roads:
-                raster_model_filename = "CNN_sel_attachRoadsTrue_8893252p_100000s_25ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-        elif architecture_raster == "vit":
-            if attach_roads:
-                raster_model_filename = "ViT_sel_attachRoadsTrue_20783620p_100000s_20ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-
-        if architecture_vector == "hgnn":
-            if attach_roads:
-                vector_model_filename = "HGNN_sel_attachRoadsTrue_540548p_100000s_80ep_bs512_cuda.pth"
-            else:
-                raise NotImplementedError
-        elif architecture_vector == "hgt":
-            if attach_roads:
-                raise NotImplementedError
-            else:
-                raise NotImplementedError
+    raster_model_filename, vector_model_filename = get_constituent_model_filenames(architecture, operator_model, attach_roads)
 
     # load the trained raster model
     raster_model = load_trained_raster_model(raster_model_filename, raster_path, device)
