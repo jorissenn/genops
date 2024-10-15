@@ -97,6 +97,7 @@ def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, 
                                            operators=operators_to_predict, 
                                            features=features, 
                                            attach_roads=attach_roads)
+    dummy_vector_sample = dummy_vector_sample.to(device)
 
     # load raster dummy sample
     path_to_raster_training_data = os.path.join(raster_path, "training_data", "elimination", "training")
@@ -109,6 +110,7 @@ def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, 
                                                     raster_transform=None,
                                                     vector_transform=None,
                                                     subset=None)[0][0]
+    dummy_raster_sample = dummy_raster_sample.to(device)
 
     # get the filenames of the trained constituent models
     raster_model_filename, vector_model_filename = get_constituent_model_filenames(architecture, operator_model, attach_roads)
