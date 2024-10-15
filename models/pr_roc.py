@@ -3,6 +3,7 @@ sys.path.append("models/raster")
 sys.path.append("models/vector")
 sys.path.append("models/multimodal")
 
+import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -51,8 +52,9 @@ def get_pr_roc(model, dataset, batch_size, operators_to_pred, device, interval, 
         raise NotImplementedError
 
     # generate thresholds to test
-    num_increments = int((interval[1] - interval[0]) / increment) + 1
+    num_increments = math.ceil((interval[1] - interval[0]) / increment) + 1
     thresholds = np.linspace(interval[0], interval[1], num=num_increments)
+    thresholds = [round(threshold, 3) for threshold in thresholds]
 
     # prepare dictionary with results
     metrics_dic = {"operator": [], "metric": []}
@@ -142,7 +144,7 @@ def plot_pr_curve(pr_roc_files, validation, legend_order, figsize=(10,6), save=F
 
     # plot the PR curve for every operator
     for i, operator in enumerate(operators):
-        operator_data = precision_recall_data[precision_recall_data["operator"] == operator]
+        operator_data = precision_recall_data[precision_recall_data["operator"] == operator].dropna(axis=1, how="any")
         recall = operator_data[operator_data["metric"] == "recall"].iloc[:,2:].values.flatten()
         precision = operator_data[operator_data["metric"] == "precision"].iloc[:,2:].values.flatten()
 
@@ -217,7 +219,7 @@ def plot_roc_curve(pr_roc_files, validation, legend_order, figsize=(10,6), save=
 
     # plot the ROC curve for every operator
     for i, operator in enumerate(operators):
-        operator_data = fpr_tpr_data[fpr_tpr_data["operator"] == operator]
+        operator_data = fpr_tpr_data[fpr_tpr_data["operator"] == operator].dropna(axis=1, how="any")
         fpr = operator_data[operator_data["metric"] == "fpr"].iloc[:,2:].values.flatten()
         tpr = operator_data[operator_data["metric"] == "recall"].iloc[:,2:].values.flatten()
 
