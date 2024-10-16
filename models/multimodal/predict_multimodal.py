@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from features import important_features
 
 from dataset_multimodal import BuildingMultimodalDatasetUUID, collate_raster_vector
+from thresholds_multimodal import multimodal_thresholds
 
 from models.operators import elimination_operators, selection_operators, threshold_dic_to_tensor
 
@@ -40,11 +41,17 @@ def get_activations_multimodal(model, dataset, batch_size, operators_to_pred, de
 
     return activations
 
-def predict_multimodal_elimination(elimination_model, path_to_raster_data, path_to_vector_data, uuid, attach_roads, threshold, device):
+def predict_multimodal_elimination(elimination_model, path_to_raster_data, path_to_vector_data, uuid, attach_roads, device):
     '''Conducts an operator prediction given a multimodal elimination model and a uuid.'''
+    # get architecture names from model object 
+    architecture = f"{elimination_model.raster_model.__class__.__name__}+{elimination_model.vector_model.__class__.__name__}"
+    vector_architecture = elimination_model.vector_model.__class__.__name__
+    
     # define important features
-    architecture = elimination_model.vector_model.__class__.__name__
-    features = important_features[f"{architecture} elimination"]
+    features = important_features[f"{vector_architecture} elimination"]
+
+    # extract threshold
+    threshold = multimodal_thresholds[f"{architecture} elimination"]
 
     # create Dataset and DataLoader
     dataset = BuildingMultimodalDatasetUUID(raster_path=path_to_raster_data,
@@ -66,11 +73,17 @@ def predict_multimodal_elimination(elimination_model, path_to_raster_data, path_
 
             return int(pred_elimination_label.item())
 
-def predict_multimodal_selection(selection_model, path_to_raster_data, path_to_vector_data, uuid, attach_roads, thresholds, device):
+def predict_multimodal_selection(selection_model, path_to_raster_data, path_to_vector_data, uuid, attach_roads, device):
     '''Conducts an operator prediction given a multimodal selection model and a uuid.'''
+    # get architecture names from model object 
+    architecture = f"{selection_model.raster_model.__class__.__name__}+{selection_model.vector_model.__class__.__name__}"
+    vector_architecture = selection_model.vector_model.__class__.__name__
+    
     # define important features
-    architecture = selection_model.vector_model.__class__.__name__
-    features = important_features[f"{architecture} selection"]
+    features = important_features[f"{vector_architecture} selection"]
+
+    # extract thresholds and convert to tensor
+    thresholds = threshold_dic_to_tensor(multimodal_thresholds[f"{architecture} selection"])
     
     # create Dataset and DataLoader
     dataset = BuildingMultimodalDatasetUUID(raster_path=path_to_raster_data,
@@ -80,9 +93,6 @@ def predict_multimodal_selection(selection_model, path_to_raster_data, path_to_v
                                             uuid=uuid,
                                             attach_roads=attach_roads)
     dataloader = DataLoader(dataset=dataset, batch_size=1, shuffle=False, collate_fn=collate_raster_vector)
-
-    # convert thresholds to tensor
-    thresholds = threshold_dic_to_tensor(thresholds)
 
     # compute prediction through the selection model
     with torch.no_grad():
