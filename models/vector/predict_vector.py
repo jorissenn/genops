@@ -65,10 +65,10 @@ def predict_vector_elimination(elimination_model, path_to_vector_data, uuid, att
         for vector_sample in dataloader:
             vector_sample.to(device)
             pred_elimination_logits = elimination_model(vector_sample.x_dict, vector_sample.edge_index_dict)
-            pred_elimination = torch.sigmoid(pred_elimination_logits)
-            pred_elimination_label = (pred_elimination > threshold).float().squeeze(0)
+            pred_elimination = torch.sigmoid(pred_elimination_logits).squeeze(0)
+            pred_elimination_label = (pred_elimination > threshold).float()
 
-            return int(pred_elimination_label.item())
+            return {"elimination": {"thresholded": int(pred_elimination_label.item()), "non-thresholded": pred_elimination.item()}}
 
 def predict_vector_selection(selection_model, path_to_vector_data, uuid, attach_roads, device):
     '''Conducts an operator prediction given a vector selection model and a uuid.'''
@@ -94,13 +94,13 @@ def predict_vector_selection(selection_model, path_to_vector_data, uuid, attach_
         for vector_sample in dataloader:
             vector_sample.to(device)
             pred_selection_logits = selection_model(vector_sample.x_dict, vector_sample.edge_index_dict)
-            pred_selection = torch.sigmoid(pred_selection_logits)
-            pred_selection_label = (pred_selection > thresholds).float().squeeze(0)
+            pred_selection = torch.sigmoid(pred_selection_logits).squeeze(0)
+            pred_selection_label = (pred_selection > thresholds).float()
 
     # store the predictions for all operators
     operators_pred = {}
 
     for i, operator in enumerate(selection_operators):
-        operators_pred[operator] = int(pred_selection_label[i].item())
+        operators_pred[operator] = {"thresholded": int(pred_selection_label[i].item()), "non-thresholded": pred_selection[i].item()}
 
     return operators_pred
