@@ -6,10 +6,10 @@ sys.path.append("..")
 import os
 import torch
 
-from initialize_raster import load_trained_raster_model
+from initialize_raster import initialize_raster_model
 
 from dataset_vector import get_dummy_sample
-from initialize_vector import load_trained_vector_model
+from initialize_vector import initialize_vector_model
 from features import important_features
 
 from dataset_multimodal import BuildingMultimodalDataset
@@ -112,14 +112,11 @@ def load_trained_multimodal_model(model_filename, multimodal_path, raster_path, 
                                                     subset=None)[0][0]
     dummy_raster_sample = dummy_raster_sample.to(device)
 
-    # get the filenames of the trained constituent models
-    raster_model_filename, vector_model_filename = get_constituent_model_filenames(architecture, operator_model, attach_roads)
+    # initialize raster model
+    raster_model = initialize_raster_model(architecture_raster, operators_to_predict, attach_roads)
 
-    # load the trained raster model
-    raster_model = load_trained_raster_model(raster_model_filename, raster_path, device)
-
-    # load trained vector model
-    vector_model = load_trained_vector_model(vector_model_filename, vector_path, device)
+    # initialize vector model
+    vector_model = initialize_vector_model(architecture=architecture_vector, sample=dummy_vector_sample, hidden_channels=128, num_heads=8, num_layers=3, node_to_predict="focal_building")
 
     # initialize the multimodal model
     model = MultimodalModel(raster_model=raster_model, 
