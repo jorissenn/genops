@@ -12,3 +12,4 @@ Necessary packages to be installed:
 * rasterio (pip install rasterio)
 * multiprocess (pip install multiprocess)
 * einops (pip install einops)
+* PtitPrince (pip install ptitprince)
