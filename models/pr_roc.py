@@ -284,14 +284,14 @@ def create_model_operator_roc_subplots(figsize, padding):
     
     # set axis labels at the margins
     axis_fontsize = 13
-    ax_enl_raster.set_xlabel("True positive rate", fontsize=axis_fontsize)
-    ax_enl_vector.set_xlabel("True positive rate", fontsize=axis_fontsize)
-    ax_enl_multimodal.set_xlabel("True positive rate", fontsize=axis_fontsize)
-    ax_eli_raster.set_ylabel("False positive rate", fontsize=axis_fontsize)
-    ax_agg_raster.set_ylabel("False positive rate", fontsize=axis_fontsize)
-    ax_typ_raster.set_ylabel("False positive rate", fontsize=axis_fontsize)
-    ax_dis_raster.set_ylabel("False positive rate", fontsize=axis_fontsize)
-    ax_enl_raster.set_ylabel("False positive rate", fontsize=axis_fontsize)
+    ax_enl_raster.set_xlabel("False positive rate", fontsize=axis_fontsize)
+    ax_enl_vector.set_xlabel("False positive rate", fontsize=axis_fontsize)
+    ax_enl_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+    ax_eli_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+    ax_agg_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+    ax_typ_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+    ax_dis_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+    ax_enl_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
 
     # set operators as secondary y-axes
     operator_fontsize = 20
