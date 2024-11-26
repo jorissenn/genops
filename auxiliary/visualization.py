@@ -98,6 +98,36 @@ def plot_graph(graph, ax, position=True, labels=False, node_color=None, node_col
     if labels:
         nx.draw_networkx_labels(G=graph, pos=pos, font_size=12, font_color="white")
 
+def plot_buildings_in_street_block(block_id, buildings, street_blocks, figsize, axis=False):
+    '''Given a block_id, plots the buildings at 1:25,000 and 1:50,000 as well as the boundary of the street block.'''
+    # extract buildings and street block associated with given block_id
+    buildings_block = buildings[buildings["block_id"] == block_id]
+    street_block = street_blocks[street_blocks["block_id"] == block_id]
+    
+    # initialize figure
+    fig, ax = plt.subplots(1,1, figsize=figsize)
+    
+    # plot the map features
+    street_block.boundary.plot(ax=ax, color="black", label="Roads at 1:50,000", lw=2)
+    buildings_block.plot(ax=ax, color="darkgray", label="Buildings at 1:25,000")
+    buildings_block_generalized = buildings_block.set_geometry("target_geom")
+    buildings_block_generalized.boundary.plot(ax=ax, color="#ff7f00", label="Buildings at 1:50,000", lw=2)
+
+    # customize the axes
+    minx, miny, maxx, maxy = street_block.geometry.item().bounds
+    
+    if not axis:
+        ax.axis("off")
+
+    ax.set_xlim(minx-5, maxx+5)
+    ax.set_ylim(miny-5, maxy+5)
+    ax.set_xticks([])
+    ax.set_xticklabels([])
+    ax.set_yticks([])
+    ax.set_yticklabels([])
+
+    return fig, ax
+
 def visualize_operator_distribution(buildings, operators, save=False, path=None, figsize=(10,6), display_ratio=False, display_legend=True, display_ylabel=True):
     '''Plots the distribution of the given generalization operators within a buildings DataFrame individually in a barplot.'''
     prevalences = {
