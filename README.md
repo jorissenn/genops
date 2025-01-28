@@ -1,2 +1,2 @@
-# Contextual operator classification for cartographic building generalization: A multimodal deep learning approach
-This repository contains all scripts used to produce the findings of the MSc thesis "Contextual operator classification for cartographic building generalization: A multimodal deep learning approach".
+# Exploring Multimodal Deep Learning for Contextual Operator Classification in Cartographic Building Generalization
+This repository contains all scripts used to produce the findings of the MSc thesis "Exploring Multimodal Deep Learning for Contextual Operator Classification in Cartographic Building Generalization".
