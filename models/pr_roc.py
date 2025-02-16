@@ -265,59 +265,102 @@ def plot_roc_curve(pr_roc_files, validation, legend_order, figsize=(10,6), save=
     if save:
         fig.savefig(output_path, bbox_inches="tight")
 
-def create_model_operator_roc_subplots(figsize, padding):
+def create_model_operator_roc_subplots(figsize, padding, orientation="vertical"):
     '''Given a figure size and a padding, creates a figure with 5 x 3 subplots that can be used to plot ROC curves 
     by model and operator.'''
-    # create 5x3 subplots
-    fig, ((ax_eli_raster, ax_eli_vector, ax_eli_multimodal),
-          (ax_agg_raster, ax_agg_vector, ax_agg_multimodal),
-          (ax_typ_raster, ax_typ_vector, ax_typ_multimodal),
-          (ax_dis_raster, ax_dis_vector, ax_dis_multimodal),
-          (ax_enl_raster, ax_enl_vector, ax_enl_multimodal)) = plt.subplots(nrows=5, ncols=3, figsize=figsize)
-    fig.tight_layout(pad=padding)
+    assert orientation in ("vertical", "horizontal")
     
-    # set models as figure title
-    model_fontsize = 20
-    ax_eli_raster.set_title("Raster", fontsize=model_fontsize)
-    ax_eli_vector.set_title("Vector", fontsize=model_fontsize)
-    ax_eli_multimodal.set_title("Multimodal", fontsize=model_fontsize)
+    if orientation == "vertical":
+        # create 5x3 subplots
+        fig, ((ax_eli_raster, ax_eli_vector, ax_eli_multimodal),
+              (ax_agg_raster, ax_agg_vector, ax_agg_multimodal),
+              (ax_typ_raster, ax_typ_vector, ax_typ_multimodal),
+              (ax_dis_raster, ax_dis_vector, ax_dis_multimodal),
+              (ax_enl_raster, ax_enl_vector, ax_enl_multimodal)) = plt.subplots(nrows=5, ncols=3, figsize=figsize)
+        fig.tight_layout(pad=padding)
+        
+        # set models as figure title
+        model_fontsize = 20
+        ax_eli_raster.set_title("Raster", fontsize=model_fontsize)
+        ax_eli_vector.set_title("Vector", fontsize=model_fontsize)
+        ax_eli_multimodal.set_title("Multimodal", fontsize=model_fontsize)
+        
+        # set axis labels at the margins
+        axis_fontsize = 13
+        ax_enl_raster.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_enl_vector.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_enl_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_eli_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_agg_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_typ_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_dis_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_enl_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
     
-    # set axis labels at the margins
-    axis_fontsize = 13
-    ax_enl_raster.set_xlabel("False positive rate", fontsize=axis_fontsize)
-    ax_enl_vector.set_xlabel("False positive rate", fontsize=axis_fontsize)
-    ax_enl_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
-    ax_eli_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
-    ax_agg_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
-    ax_typ_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
-    ax_dis_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
-    ax_enl_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        # set operators as secondary y-axes
+        operator_fontsize = 20
+        elimination_position = ax_eli_multimodal.get_position()
+        fig.text(elimination_position.x1, elimination_position.y0+elimination_position.height/2, 
+                 "Elimination", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
+        aggregation_position = ax_agg_multimodal.get_position()
+        fig.text(aggregation_position.x1, aggregation_position.y0+aggregation_position.height/2, 
+                 "Aggregation", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
+        typification_position = ax_typ_multimodal.get_position()
+        fig.text(typification_position.x1, typification_position.y0+typification_position.height/2, 
+                 "Typification", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
+        displacement_position = ax_dis_multimodal.get_position()
+        fig.text(displacement_position.x1, displacement_position.y0+displacement_position.height/2, 
+                 "Displacement", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
+        enlargement_position = ax_enl_multimodal.get_position()
+        fig.text(enlargement_position.x1, enlargement_position.y0+enlargement_position.height/2, 
+                 "Enlargement", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
 
-    # set operators as secondary y-axes
-    operator_fontsize = 20
-    elimination_position = ax_eli_multimodal.get_position()
-    fig.text(elimination_position.x1, elimination_position.y0+elimination_position.height/2, 
-             "Elimination", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
-    aggregation_position = ax_agg_multimodal.get_position()
-    fig.text(aggregation_position.x1, aggregation_position.y0+aggregation_position.height/2, 
-             "Aggregation", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
-    typification_position = ax_typ_multimodal.get_position()
-    fig.text(typification_position.x1, typification_position.y0+typification_position.height/2, 
-             "Typification", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
-    displacement_position = ax_dis_multimodal.get_position()
-    fig.text(displacement_position.x1, displacement_position.y0+displacement_position.height/2, 
-             "Displacement", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
-    enlargement_position = ax_enl_multimodal.get_position()
-    fig.text(enlargement_position.x1, enlargement_position.y0+enlargement_position.height/2, 
-             "Enlargement", va="center", ha="left", fontsize=operator_fontsize, rotation=90)
-
+    elif orientation == "horizontal":
+        # create 3x5 subplots
+        fig, ((ax_eli_raster, ax_agg_raster, ax_typ_raster, ax_dis_raster, ax_enl_raster), 
+              (ax_eli_vector, ax_agg_vector, ax_typ_vector, ax_dis_vector, ax_enl_vector),
+              (ax_eli_multimodal, ax_agg_multimodal, ax_typ_multimodal, ax_dis_multimodal, ax_enl_multimodal)) = plt.subplots(nrows=3, 
+                                                                                                                              ncols=5, 
+                                                                                                                              figsize=figsize)
+        fig.tight_layout(pad=padding)
+        
+        # set operators as figure title
+        operator_fontsize = 20
+        ax_eli_raster.set_title("Elimination", fontsize=operator_fontsize)
+        ax_agg_raster.set_title("Aggregation", fontsize=operator_fontsize)
+        ax_typ_raster.set_title("Typification", fontsize=operator_fontsize)
+        ax_dis_raster.set_title("Displacement", fontsize=operator_fontsize)
+        ax_enl_raster.set_title("Enlargement", fontsize=operator_fontsize)
+        
+        # set axis labels at the margins
+        axis_fontsize = 13
+        ax_eli_raster.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_eli_vector.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_eli_multimodal.set_ylabel("True positive rate", fontsize=axis_fontsize)
+        ax_eli_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_agg_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_typ_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_dis_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+        ax_enl_multimodal.set_xlabel("False positive rate", fontsize=axis_fontsize)
+    
+        # set models as secondary y-axes
+        model_fontsize = 20
+        raster_position = ax_enl_raster.get_position()
+        fig.text(raster_position.x1, raster_position.y0+raster_position.height/2, 
+                 "Raster", va="center", ha="left", fontsize=model_fontsize, rotation=90)
+        vector_position = ax_enl_vector.get_position()
+        fig.text(vector_position.x1, vector_position.y0+vector_position.height/2, 
+                 "Vector", va="center", ha="left", fontsize=model_fontsize, rotation=90)
+        multimodal_position = ax_enl_multimodal.get_position()
+        fig.text(multimodal_position.x1, multimodal_position.y0+multimodal_position.height/2, 
+                 "Multimodal", va="center", ha="left", fontsize=model_fontsize, rotation=90)
+    
     return fig, ((ax_eli_raster, ax_eli_vector, ax_eli_multimodal),
                  (ax_agg_raster, ax_agg_vector, ax_agg_multimodal),
                  (ax_typ_raster, ax_typ_vector, ax_typ_multimodal),
                  (ax_dis_raster, ax_dis_vector, ax_dis_multimodal),
                  (ax_enl_raster, ax_enl_vector, ax_enl_multimodal))
 
-def plot_roc_by_category_on_axis(df, true_label_col, pred_score_col, category_col, ax, colors):
+def plot_roc_by_category_on_axis(df, true_label_col, pred_score_col, category_col, ax, colors, label_size=8):
     '''Given a DataFrame df and the column names of the true labels, the predicted scores and the categorical variable,
     plots an ROC curve for the observations belonging to each category on the provided axis.'''
     # extract categories
@@ -356,4 +399,4 @@ def plot_roc_by_category_on_axis(df, true_label_col, pred_score_col, category_co
     ax.spines["right"].set_visible(False)
     ax.set_aspect("equal", adjustable="box")
 
-    ax.legend([handles[idx] for idx in order], [labels[idx] for idx in order], frameon=False, fontsize=8)
+    ax.legend([handles[idx] for idx in order], [labels[idx] for idx in order], frameon=False, fontsize=label_size)
